@@ -6,3 +6,8 @@ enum class Fields {
     PASSWORD,
     EMAIL
 }
+enum class SignupFields {
+    EMAIL,
+    PASSWORD,
+    CONFIRMATION
+}

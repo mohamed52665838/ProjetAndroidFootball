@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -51,13 +53,15 @@ android {
 
 dependencies {
     val lifecycle_version = "2.8.5"
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
-    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    val nav_version = "2.8.3"
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

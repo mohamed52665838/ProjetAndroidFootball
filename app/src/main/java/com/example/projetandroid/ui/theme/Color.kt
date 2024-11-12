@@ -41,7 +41,7 @@ object AppColors {
     )
 
     // container color
-    
+
     val DarkCyan = mapOf(
         "DEFAULT" to Color(0xFF429393),
         "100" to Color(0xFF0D1E1E),
@@ -56,3 +56,14 @@ object AppColors {
     )
 
 }
+
+val primaryColor = Color(0xff000000)
+val primaryColorVariant = (10 downTo 1).map { primaryColor.copy(alpha = it * 0.1f) }
+val secondaryColor = Color.Green.copy(alpha = 0.8f)
+val secondaryColorVariant = (10 downTo 1).map { secondaryColor.copy(alpha = it * 0.1f) }
+val tertiaryColor = Color(0xFFFFD700)
+val tertiaryColorVariant = (10 downTo 1).map { secondaryColor.copy(alpha = it * 0.1f) }
+val containerColor = Color.White
+val surfaceColor = Color(0xFFEDEDED)
+
+
