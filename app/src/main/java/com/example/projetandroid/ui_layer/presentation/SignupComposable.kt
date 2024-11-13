@@ -528,8 +528,14 @@ fun SignupComposable(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
+                            viewModel.errorMap[SignupFields.NAME]?.let {
+                                Text(
+                                    it,
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                             Spacer(modifier = Modifier.height(4.dp))
-
                             OutlinedTextField(
                                 placeholder = {
                                     Text(text = "lastname", color = primaryColorVariant[7])
@@ -541,6 +547,13 @@ fun SignupComposable(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                             )
+                            viewModel.errorMap[SignupFields.LASTNAME]?.let {
+                                Text(
+                                    it,
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                             Spacer(modifier = Modifier.height(4.dp))
                             OutlinedTextField(
                                 placeholder = {
@@ -554,6 +567,13 @@ fun SignupComposable(
                                     .fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                             )
+                            viewModel.errorMap[SignupFields.PHONE_NUMBER]?.let {
+                                Text(
+                                    it,
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
                                 modifier = Modifier

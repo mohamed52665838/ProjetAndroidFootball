@@ -189,63 +189,84 @@ fun LoginComposable(
                         absoluteRight.linkTo(logo.absoluteRight)
                     }
                 )
-                OutlinedTextField(
-                    maxLines = 1,
-                    placeholder = {
-                        Text(text = "email, eg example@g.tn", color = primaryColorVariant[7])
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_account_circle_24),
-                            contentDescription = ""
-                        )
-                    },
-                    value = viewModel.email,
-                    onValueChange = { viewModel.email = it },
+                Column(
+
                     modifier = Modifier
                         .constrainAs(email) {
                             linkTo(top = parent.top, bottom = parent.bottom, bias = 0.35f)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
                         }
-                        .fillMaxWidth()
-                )
-                viewModel.errorMap[Fields.EMAIL]?.let {
-                    Text("invalid email, check it", color = Color.Red)
-                }
-                OutlinedTextField(
-                    value = viewModel.password,
-                    leadingIcon = {
-                        Icon(
+                ) {
+                    OutlinedTextField(
+                        maxLines = 1,
+                        placeholder = {
+                            Text(text = "email, eg example@g.tn", color = primaryColorVariant[7])
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_account_circle_24),
+                                contentDescription = ""
+                            )
+                        },
+                        value = viewModel.email,
+                        onValueChange = { viewModel.email = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
 
-                            painter = painterResource(id = R.drawable.baseline_lock_24),
-                            contentDescription = ""
+                    viewModel.errorMap[Fields.EMAIL]?.let {
+                        Text(
+                            "invalid email, check it",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodySmall
                         )
-
-                    },
-                    onValueChange = {
-                        viewModel.password = it
-                    },
-                    placeholder = {
-                        Text(text = "password", color = primaryColorVariant[7])
-                    },
+                    }
+                }
+                Column(
                     modifier = Modifier
                         .constrainAs(password) {
                             linkTo(top = email.bottom, bottom = parent.bottom, bias = 0.02f)
                         }
-                        .fillMaxWidth(),
-                    trailingIcon = {
-                        Icon(
-                            painter = painterResource(id = if (isPasswordShow) R.drawable.baseline_visibility_24 else R.drawable.baseline_visibility_off_24),
-                            contentDescription = "password",
-                            modifier = Modifier.clickable { isPasswordShow = !isPasswordShow }
+                ) {
+
+                    OutlinedTextField(
+                        value = viewModel.password,
+                        leadingIcon = {
+                            Icon(
+
+                                painter = painterResource(id = R.drawable.baseline_lock_24),
+                                contentDescription = ""
+                            )
+
+                        },
+                        onValueChange = {
+                            viewModel.password = it
+                        },
+                        placeholder = {
+                            Text(text = "password", color = primaryColorVariant[7])
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        trailingIcon = {
+                            Icon(
+                                painter = painterResource(id = if (isPasswordShow) R.drawable.baseline_visibility_24 else R.drawable.baseline_visibility_off_24),
+                                contentDescription = "password",
+                                modifier = Modifier.clickable { isPasswordShow = !isPasswordShow }
+                            )
+                        },
+                        visualTransformation = if (isPasswordShow) VisualTransformation.None else PasswordVisualTransformation()
+                    )
+                    viewModel.errorMap[Fields.PASSWORD]?.let {
+                        Text(
+                            "password at least 6 characters",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodySmall
                         )
-                    },
-                    visualTransformation = if (isPasswordShow) VisualTransformation.None else PasswordVisualTransformation()
-                )
-                viewModel.errorMap[Fields.PASSWORD]?.let {
-                    Text("password at least 6 characters", color = Color.Red)
+                    }
                 }
+
+
                 Row(
                     modifier = Modifier.constrainAs(rememberMe) {
                         linkTo(start = parent.start, end = parent.end, bias = 0f)

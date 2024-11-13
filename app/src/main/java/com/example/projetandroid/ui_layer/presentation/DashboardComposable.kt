@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -52,6 +53,7 @@ import com.example.projetandroid.SignIn
 import com.example.projetandroid.ui_layer.ui.theme.containerColor
 import com.example.projetandroid.ui_layer.ui.theme.primaryColor
 import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.ui.theme.tertiaryColor
 import com.example.projetandroid.ui_layer.viewModels.DashboardViewModel
 
 
@@ -115,7 +117,6 @@ fun DashboardComposable(
         mutableStateOf("")
     }
 
-
     if (isLogoutAlertShow) {
         AlertDialog(onDismissRequest = { isLogoutAlertShow = true }, confirmButton = {
             TextButton(onClick = {
@@ -124,14 +125,14 @@ fun DashboardComposable(
                     popUpTo(SignIn)
                 }
             }) {
-                Text(text = "logout")
+                Text(text = "logout", style = MaterialTheme.typography.bodyMedium)
             }
         },
             dismissButton = {
                 TextButton(onClick = {
                     isLogoutAlertShow = false
                 }) {
-                    Text(text = "cancel")
+                    Text(text = "cancel", style = MaterialTheme.typography.bodyMedium)
                 }
             },
             text = {
@@ -163,7 +164,6 @@ fun DashboardComposable(
 
 
                 }) {
-
                     Text("delete", style = MaterialTheme.typography.bodyMedium)
                 }
             },
@@ -189,6 +189,10 @@ fun DashboardComposable(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = secondaryColor,
+                        selectedIconColor = Color.White
+                    ),
                     selected = currentFragment == DashboardState.HOME_FRAGMENT,
 
                     onClick = {
@@ -202,6 +206,10 @@ fun DashboardComposable(
                         )
                     })
                 NavigationBarItem(
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = secondaryColor,
+                        selectedIconColor = Color.White
+                    ),
                     selected = currentFragment == DashboardState.ACTIVITY_FRAGMENT,
                     onClick = {
                         currentFragment = DashboardState.ACTIVITY_FRAGMENT
@@ -213,6 +221,10 @@ fun DashboardComposable(
                         )
                     })
                 NavigationBarItem(
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = secondaryColor,
+                        selectedIconColor = Color.White
+                    ),
                     selected = currentFragment == DashboardState.PROFILE_FRAGMENT,
                     onClick = {
                         currentFragment = DashboardState.PROFILE_FRAGMENT
@@ -227,8 +239,6 @@ fun DashboardComposable(
         }
     ) {
         Box(Modifier.padding(it)) {
-
-
             viewModel.user?.let {
 
                 AnimatedContent(targetState = currentFragment, label = "") { currentFragment ->

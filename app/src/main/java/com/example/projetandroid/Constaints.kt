@@ -11,7 +11,10 @@ enum class Fields {
 enum class SignupFields {
     EMAIL,
     PASSWORD,
-    CONFIRMATION
+    CONFIRMATION,
+    NAME,
+    LASTNAME,
+    PHONE_NUMBER
 }
 
 

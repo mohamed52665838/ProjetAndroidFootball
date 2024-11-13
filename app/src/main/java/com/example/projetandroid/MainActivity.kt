@@ -9,6 +9,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -98,10 +100,10 @@ class MainActivity : ComponentActivity() {
 
                         composable<SignIn>(
                             enterTransition = {
-                                slideInVertically()
+                                scaleIn()
                             },
                             exitTransition = {
-                                slideOutVertically()
+                                scaleOut()
                             }
                         ) {
                             LoginComposable(
@@ -110,10 +112,10 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<SignUp>(
                             enterTransition = {
-                                slideInVertically()
+                                scaleIn()
                             },
                             exitTransition = {
-                                slideOutVertically()
+                                scaleOut()
                             }
                         ) {
                             SignupComposable(androidNavController)
@@ -121,10 +123,11 @@ class MainActivity : ComponentActivity() {
 
                         composable<CodeOTP>(
                             enterTransition = {
-                                slideInVertically()
+                                scaleIn()
                             },
+
                             exitTransition = {
-                                slideOutVertically()
+                                scaleOut()
                             }
                         ) {
                             val email = it.toRoute<CodeOTP>().email
@@ -136,10 +139,11 @@ class MainActivity : ComponentActivity() {
 
                         composable<Dashboard>(
                             enterTransition = {
-                                slideInVertically()
+                                scaleIn()
                             },
+
                             exitTransition = {
-                                slideOutVertically()
+                                scaleOut()
                             }
                         ) {
                             DashboardComposable(

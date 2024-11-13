@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.Events
@@ -74,11 +75,22 @@ class SignupViewModel @Inject constructor(
 
     fun validateFirstScreen(): Boolean {
         _errorMap.clear()
-        if (name.isNotEmpty() && lastname.isNotEmpty() && phoneNumber.length == 8) {
-            _currentScreen.value = SignUpFragments.SECOND_FRAGMENT
-            return true
+
+        if (name.isEmpty()) {
+            _errorMap[SignupFields.NAME] = "Username at least two character"
         }
-        return false
+
+        if (lastname.isEmpty()) {
+            _errorMap[SignupFields.LASTNAME] = "Lastname at least two character"
+        }
+
+        if (phoneNumber.length != 8 && phoneNumber.isDigitsOnly()) {
+            _errorMap[SignupFields.PHONE_NUMBER] = "Phone number exactly eight digits"
+        }
+
+        if (_errorMap.isNotEmpty())
+            return false
+        return true
     }
 
 
@@ -87,7 +99,7 @@ class SignupViewModel @Inject constructor(
         // validation
         // email
         val regularExpressionEmail =
-            """^[a-zA-Z]{1}[a-zA-Z0-9_\.-]*[a-zA-Z0-9]@[a-zA-Z]{1}[a-zA-Z-]*[a-zA-Z]{1}(\.[a-zA-Z]{2,})+$""".toRegex()
+            """^[a-zA-Z][a-zA-Z0-9_.-]*[a-zA-Z0-9]@[a-zA-Z][a-zA-Z-]*[a-zA-Z](\.[a-zA-Z]{2,})+$""".toRegex()
 
         if (!regularExpressionEmail.matches(email)) {
             _errorMap[SignupFields.EMAIL] = "invalid email, please check your email"
@@ -98,12 +110,15 @@ class SignupViewModel @Inject constructor(
             println("we got error of password")
         }
 
+        if (password != passwordConfirmation) {
+            _errorMap[SignupFields.CONFIRMATION] = "confirmation not correct"
+        }
+
         if (_errorMap.isNotEmpty()) {
             return false
         }
         return true
     }
-
 
     fun backFirstScreen(): Boolean {
         clearSecondScreen()
