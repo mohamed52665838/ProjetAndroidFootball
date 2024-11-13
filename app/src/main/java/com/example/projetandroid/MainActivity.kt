@@ -8,6 +8,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -28,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,16 +39,28 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type.InsetsType
 import androidx.core.view.WindowInsetsCompat.Type.statusBars
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.example.projetandroid.presentation.LoginComposable
-import com.example.projetandroid.presentation.SignupComposable
-import com.example.projetandroid.ui.theme.ProjetAndroidTheme
+import androidx.navigation.toRoute
+import com.example.projetandroid.ui_layer.presentation.DashboardComposable
+import com.example.projetandroid.ui_layer.presentation.LoginComposable
+import com.example.projetandroid.ui_layer.presentation.OTAValidatorComposable
+import com.example.projetandroid.ui_layer.presentation.SignupComposable
+import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.viewModels.LoginViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.Serializable
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +75,13 @@ class MainActivity : ComponentActivity() {
                 systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         }
-        
         enableEdgeToEdge()
 
         setContent {
             val androidNavController = rememberNavController()
             val currentBackStack by androidNavController.currentBackStackEntryAsState()
             val destination = currentBackStack?.destination
+
             ProjetAndroidTheme {
                 Scaffold(
                     modifier = Modifier
@@ -90,8 +104,9 @@ class MainActivity : ComponentActivity() {
                                 slideOutVertically()
                             }
                         ) {
-
-                            LoginComposable(androidNavController)
+                            LoginComposable(
+                                androidNavController,
+                            )
                         }
                         composable<SignUp>(
                             enterTransition = {
@@ -104,6 +119,33 @@ class MainActivity : ComponentActivity() {
                             SignupComposable(androidNavController)
                         }
 
+                        composable<CodeOTP>(
+                            enterTransition = {
+                                slideInVertically()
+                            },
+                            exitTransition = {
+                                slideOutVertically()
+                            }
+                        ) {
+                            val email = it.toRoute<CodeOTP>().email
+                            OTAValidatorComposable(
+                                navController = androidNavController,
+                                email = email
+                            )
+                        }
+
+                        composable<Dashboard>(
+                            enterTransition = {
+                                slideInVertically()
+                            },
+                            exitTransition = {
+                                slideOutVertically()
+                            }
+                        ) {
+                            DashboardComposable(
+                                navController = androidNavController,
+                            )
+                        }
                     }
                 }
             }
@@ -157,6 +199,10 @@ object SignUp
 
 @kotlinx.serialization.Serializable
 object Dashboard
+
+@kotlinx.serialization.Serializable
+class CodeOTP(val email: String)
+
 
 @kotlinx.serialization.Serializable
 object SplashScreen

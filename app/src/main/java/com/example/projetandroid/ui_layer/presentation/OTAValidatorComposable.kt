@@ -1,4 +1,4 @@
-package com.example.projetandroid.presentation
+package com.example.projetandroid.ui_layer.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,17 +47,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.projetandroid.Dashboard
 import com.example.projetandroid.R
-import com.example.projetandroid.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui.theme.primaryColor
-import com.example.projetandroid.ui.theme.primaryColorVariant
-import com.example.projetandroid.ui.theme.secondaryColor
-import com.example.projetandroid.ui.theme.surfaceColor
-
+import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.ui.theme.primaryColor
+import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
+import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.viewModels.OTACodeViewModel
 
 
 @Composable
-fun OTAValidatorComposable(modifier: Modifier = Modifier) {
+fun OTAValidatorComposable(
+    email: String,
+    navController: NavController,
+    viewModel: OTACodeViewModel = hiltViewModel()
+) {
+
+
+    viewModel.state.value.data?.let {
+        navController.navigate(Dashboard)
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -76,13 +91,12 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                 .padding(vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
             ) {
-                val (logo, signIn, email, middleLayout, lastLayout, rememberMe, submitActions, divider, haventAccount) = createRefs()
+                val (logo, signIn, _layout, middleLayout, lastLayout, rememberMe, submitActions, divider, haventAccount) = createRefs()
                 Image(
                     painter = painterResource(id = R.drawable.takwira),
                     contentDescription = "content",
@@ -94,15 +108,15 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                             absoluteRight.linkTo(parent.absoluteRight)
                         }
                 )
-                    Text(
-                        text = "SIGNUP",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.constrainAs(signIn) {
-                            top.linkTo(logo.bottom)
-                            absoluteLeft.linkTo(logo.absoluteLeft)
-                            absoluteRight.linkTo(logo.absoluteRight)
-                        }
-                    )
+                Text(
+                    text = "SIGNUP",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.constrainAs(signIn) {
+                        top.linkTo(logo.bottom)
+                        absoluteLeft.linkTo(logo.absoluteLeft)
+                        absoluteRight.linkTo(logo.absoluteRight)
+                    }
+                )
 
 
                 val state = remember { mutableStateOf(TextFieldValue()) }
@@ -111,17 +125,16 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                 }) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                         BasicTextField(
-                            value = state.value,
+                            value = viewModel.code,
                             onValueChange = {
-                                if (it.text.length <= 4)
-                                    state.value = it
+                                if (viewModel.code.length < 6)
+                                    viewModel.code = it
                             },
                             textStyle = TextStyle(color = Color.Transparent, fontSize = 0.sp),
                             cursorBrush = SolidColor(Color.Black),
                             decorationBox = { innertext ->
-
                                 Row {
-                                    repeat(4) { index ->
+                                    repeat(6) { index ->
                                         Box(
                                             Modifier
                                                 .padding(horizontal = 4.dp)
@@ -134,14 +147,14 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                                                 ),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            if (state.value.text.length > index)
+                                            if (viewModel.code.length > index)
                                                 Text(
-                                                    text = state.value.text.getOrNull(index)
+                                                    text = viewModel.code.getOrNull(index)
                                                         .toString(),
                                                     color = primaryColor.copy(alpha = 0.7f)
                                                 )
                                             else {
-                                                if (state.value.text.length == index) {
+                                                if (viewModel.code.length == index) {
                                                     Box(
                                                         modifier = Modifier
                                                             .clip(RoundedCornerShape(9.dp))
@@ -165,19 +178,22 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                         )
                     }
                     TextButton(onClick = { /*TODO*/ }, contentPadding = PaddingValues(0.dp)) {
-                       Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(painter = painterResource(id = R.drawable.baseline_restart_alt_24), contentDescription = "resend")
-                           Spacer(modifier = Modifier.width(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_restart_alt_24),
+                                contentDescription = "resend"
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(text = "resend", style = MaterialTheme.typography.bodyMedium)
-                       }
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
-                    ){
+                    ) {
                         OutlinedButton(
-                            onClick = { /*TODO*/ },
+                            onClick = {},
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors()
                         ) {
@@ -193,7 +209,9 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                viewModel.submitCode(email)
+                            },
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = secondaryColor)
                         ) {
@@ -210,11 +228,23 @@ fun OTAValidatorComposable(modifier: Modifier = Modifier) {
                     }
                 }
 
-                }
+            }
 
-                }
+        }
+
+        if (
+            viewModel.state.value.isLoading
+        )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.White.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
     }
+}
 
 
 @Composable
@@ -245,7 +275,7 @@ fun OTAValidatorComposableP(modifier: Modifier = Modifier) {
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
             ) {
-                val (logo, signIn, email, middleLayout, lastLayout, rememberMe, submitActions, divider, haventAccount) = createRefs()
+                val (logo, signIn, email_layout, middleLayout, lastLayout, rememberMe, submitActions, divider, haventAccount) = createRefs()
                 Image(
                     painter = painterResource(id = R.drawable.takwira),
                     contentDescription = "content",
@@ -276,7 +306,7 @@ fun OTAValidatorComposableP(modifier: Modifier = Modifier) {
                         BasicTextField(
                             value = state.value,
                             onValueChange = {
-                                if (it.text.length <= 4)
+                                if (it.text.length <= 6)
                                     state.value = it
                             },
                             textStyle = TextStyle(color = Color.Transparent, fontSize = 0.sp),
@@ -284,7 +314,7 @@ fun OTAValidatorComposableP(modifier: Modifier = Modifier) {
                             decorationBox = { innertext ->
 
                                 Row {
-                                    repeat(4) { index ->
+                                    repeat(6) { index ->
                                         Box(
                                             Modifier
                                                 .padding(horizontal = 4.dp)
@@ -328,16 +358,19 @@ fun OTAValidatorComposableP(modifier: Modifier = Modifier) {
                     }
                     TextButton(onClick = { /*TODO*/ }, contentPadding = PaddingValues(0.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(painter = painterResource(id = R.drawable.baseline_restart_alt_24), contentDescription = "resend")
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_restart_alt_24),
+                                contentDescription = "resend"
+                            )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(text = "resend", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
-                    ){
+                    ) {
                         OutlinedButton(
                             onClick = { /*TODO*/ },
                             shape = RoundedCornerShape(8.dp),

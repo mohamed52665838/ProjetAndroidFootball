@@ -1,5 +1,6 @@
-package com.example.projetandroid.presentation
+package com.example.projetandroid.ui_layer.presentation
 
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,48 +58,88 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.example.projetandroid.Dashboard
 import com.example.projetandroid.Fields
 import com.example.projetandroid.R
 import com.example.projetandroid.SignUp
-import com.example.projetandroid.ui.theme.AppColors
-import com.example.projetandroid.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui.theme.containerColor
-import com.example.projetandroid.ui.theme.primaryColor
-import com.example.projetandroid.ui.theme.primaryColorVariant
-import com.example.projetandroid.ui.theme.secondaryColor
-import com.example.projetandroid.ui.theme.secondaryColorVariant
-import com.example.projetandroid.ui.theme.surfaceColor
-import com.example.projetandroid.viewModels.LoginViewModel
+import com.example.projetandroid.ui_layer.ui.theme.AppColors
+import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.ui.theme.containerColor
+import com.example.projetandroid.ui_layer.ui.theme.primaryColor
+import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
+import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.ui.theme.secondaryColorVariant
+import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.viewModels.LoginViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 
 @Composable
 fun LoginComposable(
     navController: NavController,
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
-
     var isPasswordShow by rememberSaveable {
         mutableStateOf(false)
     }
     var isShowAlertDialog by rememberSaveable {
         mutableStateOf(false)
     }
+    val screenState = viewModel.state
 
 
-    if (false) {
+    screenState.value.errorMessage?.let {
         AlertDialog(
-            {},
-            {},
-            title = { Text("We got Data") },
-            text = { Text("we have got all data right now") }
+            onDismissRequest = {
+                viewModel.clearState()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearState()
+                }) {
+                    Text("OK")
+                }
+            },
+            text = {
+                Text(it)
+            }
+        )
+    }
+
+    screenState.value.data?.let {
+        navController.navigate(Dashboard)
+    }
+
+    screenState.value.errorMessage?.let {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.clearState()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearState()
+                }) {
+                    Text("OK", style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            text = {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         )
     }
 
@@ -153,10 +195,13 @@ fun LoginComposable(
                         Text(text = "email, eg example@g.tn", color = primaryColorVariant[7])
                     },
                     leadingIcon = {
-                        Icon(painter = painterResource(id = R.drawable.baseline_account_circle_24), contentDescription = "")
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_account_circle_24),
+                            contentDescription = ""
+                        )
                     },
                     value = viewModel.email,
-                    onValueChange = {viewModel.email = it},
+                    onValueChange = { viewModel.email = it },
                     modifier = Modifier
                         .constrainAs(email) {
                             linkTo(top = parent.top, bottom = parent.bottom, bias = 0.35f)
@@ -165,12 +210,17 @@ fun LoginComposable(
                         }
                         .fillMaxWidth()
                 )
+                viewModel.errorMap[Fields.EMAIL]?.let {
+                    Text("invalid email, check it", color = Color.Red)
+                }
                 OutlinedTextField(
                     value = viewModel.password,
                     leadingIcon = {
                         Icon(
 
-                            painter = painterResource(id = R.drawable.baseline_lock_24), contentDescription = "")
+                            painter = painterResource(id = R.drawable.baseline_lock_24),
+                            contentDescription = ""
+                        )
 
                     },
                     onValueChange = {
@@ -193,6 +243,9 @@ fun LoginComposable(
                     },
                     visualTransformation = if (isPasswordShow) VisualTransformation.None else PasswordVisualTransformation()
                 )
+                viewModel.errorMap[Fields.PASSWORD]?.let {
+                    Text("password at least 6 characters", color = Color.Red)
+                }
                 Row(
                     modifier = Modifier.constrainAs(rememberMe) {
                         linkTo(start = parent.start, end = parent.end, bias = 0f)
@@ -200,8 +253,13 @@ fun LoginComposable(
                     },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    var isChecked by remember {
+                        mutableStateOf(false)
+                    }
                     Checkbox(
-                        checked = true, onCheckedChange = {}, modifier = Modifier,
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        modifier = Modifier,
                         colors = CheckboxDefaults.colors(
                             checkedColor = secondaryColor,
                             checkmarkColor = Color.White
@@ -217,7 +275,7 @@ fun LoginComposable(
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(
-                        onClick = { /*TODO*/ },
+                        onClick = { viewModel.clearInput() },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors()
                     ) {
@@ -233,7 +291,9 @@ fun LoginComposable(
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            viewModel.login()
+                        },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = secondaryColor)
                     ) {
@@ -255,12 +315,22 @@ fun LoginComposable(
                     },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f).clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)), thickness = 4.dp)
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)),
+                        thickness = 4.dp
+                    )
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_sports_soccer_24),
                         contentDescription = "icon"
                     )
-                    HorizontalDivider(modifier = Modifier.weight(1f).clip(RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)), thickness = 4.dp)
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)),
+                        thickness = 4.dp
+                    )
                 }
                 TextButton(
                     onClick = {
@@ -275,13 +345,23 @@ fun LoginComposable(
                 }
             }
         }
+        if (screenState.value.isLoading) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.White.copy(0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+
     }
 }
 
 @Composable
 fun LoginComposableP(
-
-
 ) {
 
     var isPasswordShow by rememberSaveable {
@@ -292,11 +372,15 @@ fun LoginComposableP(
     }
 
 
-
-    if (false) {
+    if (isShowAlertDialog) {
         AlertDialog(
-            {},
-            {},
+            {
+                isShowAlertDialog = false
+
+            },
+            {
+                isShowAlertDialog = false
+            },
             title = { Text("We got Data") },
             text = { Text("we have got all data right now") }
         )
@@ -305,8 +389,7 @@ fun LoginComposableP(
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             Modifier.padding(vertical = 32.dp), contentAlignment = Alignment.Center,
-
-            ) {
+        ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(id = R.drawable.trophy),
@@ -349,18 +432,19 @@ fun LoginComposableP(
                     }
                 )
                 OutlinedTextField(
-                    maxLines = 1,
                     placeholder = {
                         Text(text = "email, eg example@g.tn", color = primaryColorVariant[7])
                     },
                     leadingIcon = {
-                        Icon(painter = painterResource(id = R.drawable.baseline_account_circle_24), contentDescription = "")
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_account_circle_24),
+                            contentDescription = ""
+                        )
                     },
                     value = "",
                     onValueChange = {},
                     modifier = Modifier
                         .constrainAs(email) {
-
                             linkTo(top = parent.top, bottom = parent.bottom, bias = 0.35f)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
@@ -372,7 +456,9 @@ fun LoginComposableP(
                     leadingIcon = {
                         Icon(
 
-                            painter = painterResource(id = R.drawable.baseline_lock_24), contentDescription = "")
+                            painter = painterResource(id = R.drawable.baseline_lock_24),
+                            contentDescription = ""
+                        )
 
                     },
                     onValueChange = {},
@@ -386,6 +472,9 @@ fun LoginComposableP(
                         .fillMaxWidth(),
                     trailingIcon = {
                         Icon(
+                            modifier = Modifier.clickable {
+                                isPasswordShow = !isPasswordShow
+                            },
                             painter = painterResource(id = if (isPasswordShow) R.drawable.baseline_visibility_24 else R.drawable.baseline_visibility_off_24),
                             contentDescription = "password"
                         )
@@ -454,16 +543,25 @@ fun LoginComposableP(
                     },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f).clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)), thickness = 4.dp)
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)),
+                        thickness = 4.dp
+                    )
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_sports_soccer_24),
                         contentDescription = "icon"
                     )
-                    HorizontalDivider(modifier = Modifier.weight(1f).clip(RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)), thickness = 4.dp)
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)),
+                        thickness = 4.dp
+                    )
                 }
                 TextButton(
                     onClick = {
-
                     },
                     modifier = Modifier.constrainAs(haventAccount) {
                         linkTo(start = parent.start, end = parent.end)
@@ -485,3 +583,7 @@ private fun LoginPreview() {
         LoginComposableP()
     }
 }
+
+
+
+

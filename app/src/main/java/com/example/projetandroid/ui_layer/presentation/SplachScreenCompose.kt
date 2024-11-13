@@ -1,27 +1,44 @@
-package com.example.projetandroid.presentation
+package com.example.projetandroid.ui_layer.presentation
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.projetandroid.R
-import com.example.projetandroid.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
 import kotlinx.coroutines.delay
 
 
@@ -31,7 +48,6 @@ fun SplashScreenCompose(
 ) {
     LaunchedEffect(true) {
         delay(1000)
-
     }
     Box(
         modifier = modifier
@@ -58,14 +74,14 @@ fun SplashScreenCompose(
 
 @Composable
 fun SplashScreenComposeP(
-    modifier: Modifier = Modifier
 ) {
     LaunchedEffect(true) {
         delay(1000)
     }
+
     Box(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize() // width and height
             .background(surfaceColor), contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -83,8 +99,99 @@ fun SplashScreenComposeP(
 }
 
 
+// arrangement   (start, end, space-between, space-around, space-evenly)
+// alignment (start, Bottom, center)
+
 @Preview(showSystemUi = true)
 @Composable
 private fun SplashScreenComposePreview() {
     SplashScreenComposeP()
 }
+
+
+// state (string, int, boolean, object)
+
+
+@Composable
+fun MyCustomButton() {
+    Row {
+        Button(onClick = {}) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_restart_alt_24),
+                contentDescription = "Hello World"
+            )
+            Text(text = "Button")
+        }
+    }
+}
+
+// arrangement
+
+// start
+// |--                |
+
+// end
+// |                --|
+
+// between
+// |-                -|
+
+// space around
+// |   -     -   |
+
+// space evenly
+// | -     - |
+
+
+// alignment
+
+// |- - - - -|              ---->
+
+// element devided in 2
+// visuelle Rext/Button/EditText
+// no visuelle layouts
+
+// xml (constraint, linear, relative)
+// Column / Row / Box
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

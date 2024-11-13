@@ -18,11 +18,16 @@ class ShardPref(application: Application) {
             apply()
         }
     }
+
     fun getToken(): String {
         val token = shardPreferences.getString(TOKENNAME, "")
         if (token.isNullOrEmpty())
             throw RuntimeException("token not exists")
         return token
+    }
+
+    fun clearToken() {
+        shardPreferences.edit().remove(TOKENNAME).remove(REFRECHTOKEN).apply()
     }
 
     fun getRefreshToken(): String {
