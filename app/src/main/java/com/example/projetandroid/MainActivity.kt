@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
             }
         }
         enableEdgeToEdge()
-
         setContent {
             val androidNavController = rememberNavController()
             val currentBackStack by androidNavController.currentBackStackEntryAsState()
@@ -157,19 +156,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-            .padding(16.dp)
-            .background(Color.Red)
-            .padding(16.dp)
-            .background(Color.Blue)
-            .padding(16.dp)
-    )
-}
-
 
 // up
 // username / password submit
@@ -178,14 +164,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 // login
 // dashboard
 
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview() {
-    ProjetAndroidTheme {
-        Greeting("Android")
-    }
-}
 
 // row / column
 @kotlinx.serialization.Serializable

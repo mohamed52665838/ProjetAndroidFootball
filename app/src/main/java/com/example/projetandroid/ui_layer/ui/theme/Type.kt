@@ -33,7 +33,6 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp
     ),
-
     titleLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.cairo_black)),
         fontWeight = FontWeight.ExtraBold,
@@ -45,25 +44,21 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 18.sp,
     ),
-
     titleSmall = TextStyle(
         fontFamily = FontFamily(Font(R.font.cairo_black)),
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
     ),
-
     labelLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.cairo_black)),
         fontWeight = FontWeight.ExtraBold,
         fontSize = 10.sp,
     ),
-
     labelMedium = TextStyle(
         fontFamily = FontFamily(Font(R.font.cairo_black)),
         fontWeight = FontWeight.Normal,
         fontSize = 8.sp,
     ),
-
     labelSmall = TextStyle(
         fontFamily = FontFamily(Font(R.font.cairo_black)),
         fontWeight = FontWeight.Normal,
@@ -78,9 +73,9 @@ private fun TryFonts() {
 
     Column {
         Text("Title:", style = Typography.titleSmall)
-        Text("Body Large", style = Typography.titleLarge)
-        Text("Body Medium", style = Typography.titleMedium)
-        Text("Body Small", style = Typography.titleSmall)
+        Text("Title Large", style = Typography.titleLarge)
+        Text("Title Medium", style = Typography.titleMedium)
+        Text("Title Small", style = Typography.titleSmall)
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
         Text("Body:", style = Typography.bodySmall)
         Text("Body Large", style = Typography.bodyLarge)
@@ -89,9 +84,9 @@ private fun TryFonts() {
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
 
         Text("Labels:", style = Typography.labelSmall)
-        Text("Body Large", style = Typography.labelLarge)
-        Text("Body Medium", style = Typography.labelMedium)
-        Text("Body Small", style = Typography.labelSmall)
+        Text("Label Large", style = Typography.labelLarge)
+        Text("Label Medium", style = Typography.labelMedium)
+        Text("Label Small", style = Typography.labelSmall)
     }
 }
 

@@ -33,9 +33,7 @@ class UserRepository @Inject constructor(
                 emit(Events.ErrorEvent(error = response.message()))
             }
         } catch (e: Exception) {
-
             emit(Events.ErrorEvent(error = e.message ?: "unexpected error just happened"))
-
         }
 
     }
