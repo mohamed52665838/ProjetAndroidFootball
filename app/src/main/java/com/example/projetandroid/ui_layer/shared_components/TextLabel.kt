@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.presentation.shared_components
+package com.example.projetandroid.ui_layer.shared_components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

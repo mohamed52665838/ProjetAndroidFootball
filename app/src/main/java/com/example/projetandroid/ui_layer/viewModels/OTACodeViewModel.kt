@@ -7,13 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.Events
-import com.example.projetandroid.Fields
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.Message
-import com.example.projetandroid.model.TokenModel
-import com.example.projetandroid.ui_layer.shard.ScreenState
+import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -51,7 +50,11 @@ class OTACodeViewModel @Inject constructor(
 
                 else -> {}
             }
-        }.launchIn(viewModelScope)
+        }.catch {
+            _state.value =
+                ScreenState(errorMessage = it.localizedMessage ?: "unexpected error just happened")
+        }
+            .launchIn(viewModelScope)
     }
 
 

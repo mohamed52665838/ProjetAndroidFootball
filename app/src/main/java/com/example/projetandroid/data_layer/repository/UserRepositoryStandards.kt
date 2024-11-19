@@ -24,7 +24,7 @@ interface UserRepositoryStandards {
     fun verifyOtp(email: String, otp: String): Flow<Events<Message?>>
     fun logout(token: String): Flow<Events<Message?>>
     fun currentUser(token: String): Flow<Events<User?>>
-    fun updateCurrentUser(token: String, id: String, updateModel: UpdateModel): Flow<Events<User?>>
+    fun updateCurrentUser(token: String, updateModel: UpdateModel): Flow<Events<User?>>
     fun deleteAccount(token: String, id: String): Flow<Events<User?>>
 
 

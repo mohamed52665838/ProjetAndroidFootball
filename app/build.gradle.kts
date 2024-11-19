@@ -82,7 +82,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
     val hilt = "2.50"
     implementation("com.google.dagger:hilt-android:$hilt")
-
+    implementation(libs.logging.interceptor)
     kapt("com.google.dagger:hilt-compiler:$hilt")
 
     implementation("androidx.activity:activity-ktx:1.9.3")

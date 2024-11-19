@@ -1,6 +1,5 @@
 package com.example.projetandroid.ui_layer.viewModels
 
-import android.media.metrics.Event
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -11,19 +10,16 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.Events
-import com.example.projetandroid.Fields
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.SignUpFragments
 import com.example.projetandroid.SignupFields
-import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.data_layer.repository.UserRepositoryStandards
 import com.example.projetandroid.model.TokenModel
-import com.example.projetandroid.ui_layer.shard.ScreenState
+import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -90,6 +86,7 @@ class SignupViewModel @Inject constructor(
 
         if (_errorMap.isNotEmpty())
             return false
+        _currentScreen.value = SignUpFragments.SECOND_FRAGMENT
         return true
     }
 
@@ -154,7 +151,12 @@ class SignupViewModel @Inject constructor(
 
                             else -> {}
                         }
-                    }.launchIn(viewModelScope)
+                    }.catch {
+                        _currentScreenState.value = ScreenState(
+                            errorMessage = it.localizedMessage ?: "unexpected error happened"
+                        )
+                    }
+                        .launchIn(viewModelScope)
 
                 }
 

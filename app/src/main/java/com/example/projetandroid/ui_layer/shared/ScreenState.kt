@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.shard
+package com.example.projetandroid.ui_layer.shared
 
 // Note: All data screens have unified state!
 

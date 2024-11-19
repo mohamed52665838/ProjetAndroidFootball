@@ -1,13 +1,11 @@
 package com.example.projetandroid.ui_layer.viewModels
 
-import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.Events
@@ -15,13 +13,11 @@ import com.example.projetandroid.Fields
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.TokenModel
-import com.example.projetandroid.ui_layer.shard.ScreenState
+import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -75,16 +71,21 @@ class LoginViewModel @Inject constructor(
                 }
 
                 is Events.SuccessEvent -> {
-                    _state.value = ScreenState(data = it.data)
                     shardPref.putToken(it.data.accessToken, it.data.refreshToken)
+                    _state.value = ScreenState(data = it.data)
                 }
 
                 is Events.LoadingEvent -> {
                     _state.value = ScreenState(isLoading = true)
                 }
+
                 else -> {}
             }
-        }.launchIn(viewModelScope)
+        }
+            .catch {
+                _state.value = ScreenState(errorMessage = it.localizedMessage ?: "unexpected error")
+            }
+            .launchIn(viewModelScope)
     }
 
     // this one is dangerous please to let me down
