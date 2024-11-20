@@ -28,10 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.projetandroid.Profile
 import com.example.projetandroid.R
+import com.example.projetandroid.SignIn
 import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
+import java.util.Stack
 
 
 // TODO("we need to add soccer field for the manager")
@@ -39,8 +43,9 @@ import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsComposable(
-    navController: NavController
-
+    navController: NavController,
+    dashboardViewModel: DashboardViewModel,
+    onSignOut: () -> Unit
 ) {
     data class MenuItem(
         val text: String,
@@ -67,7 +72,15 @@ fun SettingsComposable(
         MenuItem(text = "Guide", iconId = R.drawable.guide),
         MenuItem(text = "Licence", iconId = R.drawable.licence),
         MenuItem(text = "Policy and Privacy", iconId = R.drawable.policy),
-        MenuItem(text = "Disconnect", iconId = R.drawable.exit),
+        MenuItem(
+            text = "Disconnect",
+            iconId = R.drawable.exit,
+            callback = {
+                onSignOut()
+                navController.navigate(SignIn) {
+                    popUpTo(0)
+                }
+            }),
     )
 
     Scaffold(

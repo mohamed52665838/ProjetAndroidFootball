@@ -4,11 +4,15 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +38,7 @@ import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.Dashboard
 @Composable
 fun DashboardScaffold(
     androidNavController: NavHostController,
-    viewModel: DashboardViewModel = hiltViewModel(),
+    viewModel: DashboardViewModel,
 ) {
     var currentFragment by rememberSaveable {
         mutableStateOf(DashboardState.HOME_FRAGMENT)
@@ -113,7 +117,10 @@ fun DashboardScaffold(
                     )
 
                 DashboardState.PROFILE_FRAGMENT ->
-                    SettingsComposable(navController = androidNavController)
+                    SettingsComposable(
+                        navController = androidNavController,
+                        dashboardViewModel = viewModel,
+                        onSignOut = { navHostController.popBackStack() })
             }
         }
     }

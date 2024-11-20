@@ -55,11 +55,15 @@ import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
 import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
 import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
 import com.example.projetandroid.ui_layer.viewModels.LoginViewModel
+import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelBase
+import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelImp
+import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelProtocol
 
 
 @Composable
 fun LoginComposable(
     navController: NavController,
+    viewModelBase: AddSoccerFieldViewModelImp = hiltViewModel(),
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     var isPasswordShow by rememberSaveable {
@@ -69,7 +73,6 @@ fun LoginComposable(
         mutableStateOf(false)
     }
     val screenState = viewModel.state
-
 
     screenState.value.errorMessage?.let {
         AlertDialog(
@@ -90,7 +93,9 @@ fun LoginComposable(
     }
 
     screenState.value.data?.let {
-        navController.navigate(Dashboard)
+        navController.navigate(Dashboard) {
+            popUpTo(0)
+        }
     }
 
     screenState.value.errorMessage?.let {

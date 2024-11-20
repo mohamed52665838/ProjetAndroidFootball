@@ -5,5 +5,6 @@ class SignUpModel(
     val lastname: String? = null,
     val phone: String? = null,
     val email: String,
+    val role: String?,
     val password: String
 )

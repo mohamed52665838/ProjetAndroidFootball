@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.util.packInts
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.projetandroid.R
+import com.example.projetandroid.UiState
 import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.ui.theme.containerColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
@@ -57,47 +59,27 @@ fun ProfileComposable(
     DisposableEffect(Unit) {
         onDispose {
             viewModel.clearErrorMap()
-            viewModel.clearNetwork()
             viewModel.clearUpdateState()
         }
     }
-    viewModel.state.value.errorMessage?.let {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.clearNetwork()
-            },
-            confirmButton = {
-                TextButton(onClick = { viewModel.clearNetwork() }) {
-                    Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
-                }
-            },
-            text = {
-                Text(text = it, style = MaterialTheme.typography.bodyMedium)
-            }
-        )
-    }
+//    viewModel.state.value.errorMessage?.let {
+//        AlertDialog(
+//            onDismissRequest = {
+//                viewModel.clearNetwork()
+//            },
+//            confirmButton = {
+//                TextButton(onClick = { viewModel.clearNetwork() }) {
+//                    Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
+//                }
+//            },
+//            text = {
+//                Text(text = it, style = MaterialTheme.typography.bodyMedium)
+//            }
+//        )
+//    }
 
 
-    viewModel.triggeredState.let { map_ ->
-        if (map_.isNotEmpty())
-            AlertDialog(
-                onDismissRequest = {
-                    viewModel.clearTriggeredState()
-                },
-                confirmButton = {
-                    TextButton(onClick = { viewModel.clearTriggeredState() }) {
-                        Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
-                    }
-                },
-                text = {
-                    Text(
-                        text = map_.values.joinToString("\n"),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            )
-    }
-
+    val activityComposableChannel = viewModel.profileUiState.collectAsState(initial = UiState.Idle)
 
     Scaffold(
         topBar = {
@@ -173,14 +155,44 @@ fun ProfileComposable(
             )
         }
     }
-    if (viewModel.state.value.isLoading) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.8f))
-        ) {
-            CircularProgressIndicator()
+    when(activityComposableChannel.value) {
+        is UiState.Error -> {
+            AlertDialog(onDismissRequest = {  viewModel.profileRestore() }, confirmButton = {
+                TextButton(onClick = {
+                    viewModel.profileRestore()
+                }) {
+                    Text(text = "OK" )
+                }
+            },
+                text = {
+                    Text(text = (activityComposableChannel.value as UiState.Error).message)
+                }
+            )
+        }
+        is UiState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+               CircularProgressIndicator()
+            }
+
+        }
+        is  UiState.Success -> {
+
+            AlertDialog(onDismissRequest = { viewModel.profileRestore() },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.profileRestore()
+                    }) {
+                        Text(text = "OK" )
+                    }
+                },
+                text = {
+                    Text(text = (activityComposableChannel.value as UiState.Success).message)
+                }
+            )
+
+        }
+        is UiState.Idle -> {
+            // empty
         }
     }
 }

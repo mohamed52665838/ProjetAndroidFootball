@@ -50,6 +50,7 @@ import com.example.projetandroid.CodeOTP
 import com.example.projetandroid.R
 import com.example.projetandroid.SignUpFragments
 import com.example.projetandroid.SignupFields
+import com.example.projetandroid.ui_layer.shared_components.DropdownComposableApp
 import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
 import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
@@ -293,7 +294,10 @@ fun SignupComposable(
         mutableStateOf(false)
     }
 
-
+    val optionsList = listOf("user", "manager")
+    var userOrManager by rememberSaveable {
+        mutableStateOf(optionsList[0])
+    }
 
     viewModel.currentScreenState.value.errorMessage?.let {
         AlertDialog(
@@ -372,9 +376,15 @@ fun SignupComposable(
                     }
                 ) { currentScreen ->
                     if (currentScreen == SignUpFragments.SECOND_FRAGMENT) {
-
                         Column(
                         ) {
+                            DropdownComposableApp(
+                                value = userOrManager,
+                                onChange = {
+                                    userOrManager = it
+                                }, options = optionsList
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
                                 placeholder = {
                                     Text(
@@ -486,7 +496,7 @@ fun SignupComposable(
                                 Button(
                                     onClick = {
                                         if (viewModel.validateSecondScreen()) {
-                                            viewModel.submit()
+                                            viewModel.submit(userOrManager)
                                         }
                                     },
                                     shape = RoundedCornerShape(8.dp),

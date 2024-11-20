@@ -38,6 +38,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.projetandroid.model.User
+import com.example.projetandroid.ui_layer.presentation.manager.AddSoccerFieldComposable
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.DashboardComposable
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.DashboardState
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.LoginComposable
@@ -58,15 +60,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        } else {
-            window.insetsController?.apply {
-                hide(statusBars())
-                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        }
         enableEdgeToEdge()
         setContent {
             val androidNavController = rememberNavController()
@@ -110,8 +103,6 @@ class MainActivity : ComponentActivity() {
                             SignupComposable(androidNavController)
                         }
 
-
-
                         composable<CodeOTP>(
                             enterTransition = {
                                 scaleIn()
@@ -128,16 +119,21 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         navigation<Dashboard>(startDestination = DashboardScaffold) {
-                            val dashboardSharedViewModel: DashboardViewModel by viewModels()
                             composable<DashboardScaffold> {
                                 DashboardScaffold(
-                                    viewModel = dashboardSharedViewModel,
+                                    viewModel = hiltViewModel(),
                                     androidNavController = androidNavController,
                                 )
                             }
                             composable<Profile> {
                                 ProfileComposable(
-                                    viewModel = dashboardSharedViewModel,
+                                    viewModel = hiltViewModel(),
+                                    navController = androidNavController
+                                )
+                            }
+                            composable<AddSoccerField> {
+                                AddSoccerFieldComposable(
+                                    viewModel = hiltViewModel(),
                                     navController = androidNavController
                                 )
                             }
@@ -200,6 +196,10 @@ object Settings
 @kotlinx.serialization.Serializable
 object Activities
 
+@kotlinx.serialization.Serializable
+object AddSoccerField
 
 @kotlinx.serialization.Serializable
 object SplashScreen
+
+

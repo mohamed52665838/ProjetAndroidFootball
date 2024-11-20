@@ -15,7 +15,9 @@ import com.example.projetandroid.SignUpFragments
 import com.example.projetandroid.SignupFields
 import com.example.projetandroid.data_layer.repository.UserRepositoryStandards
 import com.example.projetandroid.model.TokenModel
+import com.example.projetandroid.model.User
 import com.example.projetandroid.ui_layer.shared.ScreenState
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -123,9 +125,16 @@ class SignupViewModel @Inject constructor(
         return true
     }
 
-    fun submit() {
+    fun submit(role: String) {
         if (!validateSecondScreen()) return
-        userRepository.signup(name, lastname, password, email, phoneNumber).onEach {
+        userRepository.signup(
+            name = name,
+            lastName = lastname,
+            password = password,
+            email = email,
+            phone = phoneNumber,
+            role = role
+        ).onEach {
             when (it) {
                 is Events.ErrorEvent -> {
                     _currentScreenState.value = ScreenState(errorMessage = it.error)
@@ -167,6 +176,21 @@ class SignupViewModel @Inject constructor(
                 else -> {}
             }
         }.launchIn(viewModelScope)
+
+
+        fun giveMeTheUser(): User {
+            val myUser = User(
+                name = name,
+                lastName = lastname,
+                phone = phoneNumber,
+                email = email,
+                password = password,
+                active = true,
+                id = ".",
+                role = "user"
+            )
+            return myUser
+        }
 
     }
 }

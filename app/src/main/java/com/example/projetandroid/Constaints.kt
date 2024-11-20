@@ -1,8 +1,10 @@
 package com.example.projetandroid
 
-import android.bluetooth.BluetoothStatusCodes
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.MutableState
 
 val BASE_URL = "http://10.0.2.2:4000"
+val ADDRESS_SEARCH_AP_URI = "https://nominatim.openstreetmap.org"
 val TOKEN_TYPE = "Bearer " // keep it secret ;)
 
 enum class Fields {
@@ -57,3 +59,46 @@ fun fromStateCodeToDeveloperMessage(
         else -> replacement.ifBlank { "we are sorry same things went wrong, we are working hard to fix it" }
     }
 
+data class BundledTextField(
+    val value: MutableState<String>,
+    val onChange: (value: String) -> Unit = { value.value = it },
+    val iconId: Int? = null,
+    val label: String? = null,
+    val onErrorMessage: MutableState<String?>? = null,
+    val supportErrorMessage: String? = null,
+    val validator: Regex? = null,
+    val keyboardOptions: KeyboardOptions? = null
+) {
+    fun validate(): Boolean {
+        onErrorMessage?.let { errorMessage ->
+            validator?.let { validator_ ->
+                if (value.value.matches(validator_)) {
+                    errorMessage.value = null
+                    return true
+                } else {
+                    errorMessage.value = supportErrorMessage
+                    return false
+                }
+            }
+        }
+        // no validation
+        return true
+    }
+
+    fun clearValidation() {
+        onErrorMessage?.value = null
+    }
+}
+
+
+enum class SoccerFieldSubmissionFragments {
+    FORM_FIRST_FRAGMENT,
+    MAP_SECOND_FRAGMENT
+}
+
+sealed class UiState {
+    data object Idle : UiState()
+    data object Loading : UiState()
+    data class Error(val message: String) : UiState()
+    data class Success(val message: String) : UiState()
+}

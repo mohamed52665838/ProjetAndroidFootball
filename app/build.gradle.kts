@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,8 +85,7 @@ dependencies {
     implementation("com.google.dagger:hilt-android:$hilt")
     implementation(libs.logging.interceptor)
     kapt("com.google.dagger:hilt-compiler:$hilt")
-
+    implementation("com.google.maps.android:maps-compose:5.0.1")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation(libs.androidx.hilt.navigation.compose)
-
 }

@@ -17,6 +17,7 @@ interface UserRepositoryStandards {
         lastName: String?,
         password: String,
         email: String,
+        role: String?,
         phone: String?,
     ): Flow<Events<TokenModel?>>
 

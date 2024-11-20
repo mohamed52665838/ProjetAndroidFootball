@@ -9,11 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.Events
 import com.example.projetandroid.ShardPref
+import com.example.projetandroid.UiState
+import com.example.projetandroid.data_layer.repository.SoccerFieldRepository
 import com.example.projetandroid.data_layer.repository.UserRepository
+import com.example.projetandroid.model.SoccerField
 import com.example.projetandroid.model.UpdateModel
 import com.example.projetandroid.model.User
 import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -31,16 +36,24 @@ enum class StatusTriggered {
     USERPROFILE_UPDATED,
     USER_LOGGED_OUT,
     USER_DELETED,
+    PROGRESS,
+    ERROR_FETCH_SOCCER_FIELD,
+    GOT_OWN_SOCCER_FIELD,
+    HAVE_NO_SOCCER_FIELD,
 }
 
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     val userRepository: UserRepository,
+    val soccerFieldRepository: SoccerFieldRepository,
     val shardPref: ShardPref
 ) : ViewModel() {
     val token = shardPref.getToken()
     var user: User? = null
+
+    // manager field
+    var soccerFields: SoccerField? = null
 
     val editProfileFieldsMap = mapOf<EditProfileFields, MutableState<String>>(
         EditProfileFields.USERNAME to mutableStateOf(""),
@@ -48,9 +61,6 @@ class DashboardViewModel @Inject constructor(
         EditProfileFields.PHONE_NUMBER to mutableStateOf(""),
     )
 
-    // triggered state -> message
-    private val _triggeredState = mutableStateMapOf<StatusTriggered, String>()
-    val triggeredState: SnapshotStateMap<StatusTriggered, String> = _triggeredState
 
     val editProfileFieldsCallbacksMap = mapOf(
         EditProfileFields.USERNAME to { value: String ->
@@ -70,19 +80,37 @@ class DashboardViewModel @Inject constructor(
     private val _state = mutableStateOf(ScreenState<User>(data = null))
     val state: State<ScreenState<User>> = _state
 
-
     private val _isAccountDeleted = mutableStateOf(false)
     val isAccountDeleted: State<Boolean> = _isAccountDeleted
 
+
+    // ui state
+
+
+    private val _homeUiState = MutableStateFlow<UiState>(UiState.Idle)
+    val homeUiState: SharedFlow<UiState>  = _homeUiState
+
+    fun homeRestore() {
+       _homeUiState.value = UiState.Idle
+    }
+
+    private val _activityUiState = MutableStateFlow<UiState>(UiState.Idle)
+    val activityUiState: SharedFlow<UiState>  = _activityUiState
+
+    fun activityRestore() {
+        _homeUiState.value = UiState.Idle
+    }
+    private val _profileUiState = MutableStateFlow<UiState>(UiState.Idle)
+    val profileUiState: SharedFlow<UiState>  = _profileUiState
+
+    fun profileRestore() {
+        _profileUiState.value = UiState.Idle
+    }
 
     init {
         loadCurrentUser()
     }
 
-
-    fun clearTriggeredState() {
-        _triggeredState.clear()
-    }
 
     fun clearUpdateState() {
         editProfileFieldsMap[EditProfileFields.USERNAME]!!.value = user?.name ?: "unset"
@@ -91,15 +119,16 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun loadCurrentUser() {
-        println("DASHBOARD INITIALIZED")
+
         userRepository.currentUser(token).onEach {
             when (it) {
+
                 is Events.ErrorEvent -> {
                     _state.value = ScreenState(errorMessage = it.error)
                 }
 
                 is Events.SuccessEvent -> {
-                    _state.value = ScreenState(data = it.data)
+                    _homeUiState.emit(UiState.Success("User Got Successfully"))
                     it.data!!
                     user = it.data
                     editProfileFieldsMap[EditProfileFields.USERNAME]!!.value =
@@ -108,6 +137,28 @@ class DashboardViewModel @Inject constructor(
                         it.data.lastName ?: "unset"
                     editProfileFieldsMap[EditProfileFields.PHONE_NUMBER]!!.value =
                         it.data.phone ?: "unset"
+
+                    if (it.data.role == "manager") {
+                        soccerFieldRepository.own(token).onEach {
+                            when (it) {
+                                is Events.LoadingEvent -> {
+                                    _homeUiState.emit(UiState.Loading)
+                                }
+                                is Events.ErrorEvent -> {
+                                    if (it.error == "HNSF") {
+                                        _homeUiState.emit(UiState.Error("-1"))
+                                    } else {
+                                       _homeUiState.emit(UiState.Error(it.error))
+                                    }
+                                }
+
+                                is Events.SuccessEvent -> {
+                                    _homeUiState.emit(UiState.Error("Got Soccer Field"))
+                                    this.soccerFields = it.data
+                                }
+                            }
+                        }.launchIn(viewModelScope)
+                    }
                 }
 
                 is Events.LoadingEvent -> {
@@ -127,6 +178,7 @@ class DashboardViewModel @Inject constructor(
             ?: "unset")
     }
 
+    // problem with profile
 
     fun updateUser() {
         if (_errorMap.isNotEmpty())
@@ -155,26 +207,18 @@ class DashboardViewModel @Inject constructor(
             .onEach {
                 when (it) {
                     is Events.ErrorEvent -> {
-                        _state.value = ScreenState(errorMessage = it.error)
+                        _profileUiState.emit(UiState.Error( it.error ))
                     }
 
                     is Events.LoadingEvent -> {
-                        println("loading")
-                        _state.value =
-                            ScreenState(data = null, isLoading = true)
+                        _profileUiState.emit(UiState.Loading)
                     }
 
                     is Events.SuccessEvent -> {
-                        _triggeredState[StatusTriggered.USERPROFILE_UPDATED] =
-                            "profile updated successfully!"
+                        _profileUiState.emit(UiState.Success("Profile updated successfully"))
                         it.data!!
-                        _state.value = ScreenState(
-                            data = it.data,
-                            successMessage = "Update With Success State"
-                        )
                         user = it.data
                     }
-
                     else -> {}
                 }
 
@@ -192,27 +236,22 @@ class DashboardViewModel @Inject constructor(
         _errorMap.clear()
     }
 
-    fun clearNetwork() {
-        _state.value = ScreenState()
-    }
 
     fun delete() {
         userRepository.deleteAccount(token, user!!.id)
             .onEach {
                 when (it) {
                     is Events.ErrorEvent -> {
-                        _state.value = ScreenState(errorMessage = it.error)
+                        _homeUiState.emit(UiState.Error(it.error))
                     }
 
                     is Events.LoadingEvent -> {
-                        _state.value =
-                            ScreenState(data = null, isLoading = true)
+                        _homeUiState.emit(UiState.Loading)
                     }
 
                     is Events.SuccessEvent -> {
                         _isAccountDeleted.value = true
                     }
-
                     else -> {}
                 }
 
@@ -223,5 +262,7 @@ class DashboardViewModel @Inject constructor(
     fun clearContext() {
         shardPref.clearToken()
     }
+
+
 
 }

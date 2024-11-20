@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,13 +48,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.projetandroid.AddSoccerField
 import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
+import com.example.projetandroid.UiState
 import com.example.projetandroid.model.User
 import com.example.projetandroid.ui_layer.shared_components.TextLabel
 import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
@@ -65,9 +79,10 @@ enum class DashboardState {
 // dashboard are represent by 3 fragments
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardComposable(
-    viewModel: DashboardViewModel = hiltViewModel(),
+    viewModel: DashboardViewModel,
     navController: NavController
 ) {
 
@@ -95,24 +110,6 @@ fun DashboardComposable(
         }
     }
 
-
-    viewModel.state.value.errorMessage?.let {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.clearNetwork()
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.clearNetwork()
-                }) {
-                    Text("OK")
-                }
-            },
-            text = {
-                Text(it)
-            }
-        )
-    }
 
     var credentialWords by remember {
         mutableStateOf("")
@@ -158,12 +155,9 @@ fun DashboardComposable(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.clearNetwork()
                     if (credentialWords == "I want to delete my account") {
                         viewModel.delete()
                     }
-
-
                 }) {
                     Text("delete", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -184,62 +178,163 @@ fun DashboardComposable(
     }
 
     val localFocusManager = LocalFocusManager.current
-
+    val activityComposableChannel = viewModel.homeUiState.collectAsState(initial = UiState.Idle)
     Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "Dashboard")
+            },
+                actions = {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_settings_24),
+                            contentDescription = "go back"
+                        )
+                    }
+                }
+            )
+        }
     ) {
-        Box(Modifier.padding(it)) {
-            viewModel.user?.let {
-                Text(
-                    text = "Welcome ${it.name.capitalize(Locale.ROOT)}",
-                    style = MaterialTheme.typography.titleLarge
-                )
+        Box(
+            Modifier
+                .padding(it)
+                .padding(horizontal = 16.dp)
+        ) {
+            Column {
 
+                viewModel.user?.let {
+                    Text(
+                        text = "Welcome ${it.name.capitalize(Locale.ROOT)}",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+                Column {
+                    viewModel.soccerFields?.let {
+                        Column {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                TerrainItem(
+                                    modifier = Modifier.weight(1f),
+                                    text = "${it.price}",
+                                    icon = R.drawable.baseline_price_check_24
+                                )
+                                TerrainItem(
+                                    modifier = Modifier.weight(1f),
+                                    text = it.date?.split("T")?.get(0) ?: "unspecified",
+                                    icon = R.drawable.baseline_calendar_month_24
+                                )
+                                TerrainItem(
+                                    modifier = Modifier.weight(1f),
+                                    text = it.label?.ifBlank { "unspecified" }
+                                        ?: "unspecified", icon = R.drawable.stadium)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(text = "Soccer Field Location")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            GoogleMap(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp),
+                                cameraPositionState = CameraPositionState(
+                                    position = CameraPosition.fromLatLngZoom(
+                                        LatLng(
+                                            it.latitude!!.toDouble(),
+                                            it.longitude!!.toDouble()
+                                        ), 15f
+                                    )
+                                )
+                            ) {
+                                Marker(
+                                    state = MarkerState(
+                                        LatLng(
+                                            it.latitude.toDouble(),
+                                            it.longitude.toDouble()
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    } ?: kotlin.run {
+
+                        viewModel.user?.let {
+                            if (it.role == "manager")
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    IconButton(onClick = {
+                                        navController.navigate(AddSoccerField)
+                                    }) {
+                                        Row {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.baseline_add_24),
+                                                contentDescription = "content"
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("field")
+                                        }
+                                    }
+                                }
+
+                        }
+
+                    }
+                }
             }
+
         }
 
 
         // event  handling (loading, ...)
-        viewModel.state.value.errorMessage?.let {
-            AlertDialog(
-                onDismissRequest = {
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                    }) {
-                        Text("OK")
-                    }
-                },
-                text = {
-                    Text(it)
+        when (activityComposableChannel.value) {
+            is UiState.Error -> {
+                if ((activityComposableChannel.value as UiState.Error).message == "-1") {
+                    navController.navigate(AddSoccerField)
+                    viewModel.homeRestore()
+                } else {
+                    AlertDialog(onDismissRequest = { viewModel.homeRestore() }, confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.activityRestore()
+                        }) {
+                            Text(text = "OK")
+                        }
+                    },
+                        text = {
+                            Text(text = (activityComposableChannel.value as UiState.Error).message)
+                        }
+                    )
                 }
-            )
-        }
-
-        if (viewModel.state.value.isLoading) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
             }
-        } else if (viewModel.state.value.successMessage.isNotEmpty()) {
-            AlertDialog(
-                onDismissRequest = {
-                    viewModel.clearNetwork()
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        viewModel.clearNetwork()
-                    }) {
-                        Text("OK")
-                    }
-                },
-                text = {
-                    Text(viewModel.state.value.successMessage)
+
+            is UiState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-            )
+            }
+
+            is UiState.Success -> {
+
+                AlertDialog(onDismissRequest = { viewModel.homeRestore() },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.homeRestore()
+                        }) {
+                            Text(text = "OK")
+                        }
+                    },
+                    text = {
+                        Text(text = (activityComposableChannel.value as UiState.Success).message)
+                    }
+                )
+
+            }
+
+            is UiState.Idle -> {
+                // empty
+            }
         }
     }
 }
@@ -423,6 +518,7 @@ fun DashboardActivitySectionManager(user: User?, modifier: Modifier = Modifier) 
         11
     )
 
+
     val localFocusManager = LocalFocusManager.current
     Scaffold(
         bottomBar = {
@@ -516,6 +612,7 @@ private fun DashboardActivitySectionManagerPreview() {
         password = "password",
         active = true,
         email = "mohamed@go.com",
+        role = "user"
     )
     ProjetAndroidTheme {
         DashboardActivitySectionManager(user = user)
@@ -534,6 +631,7 @@ fun DBHomeManagerPreview() {
         password = "password",
         active = true,
         email = "mohamed@go.com",
+        role = "user"
     )
     ProjetAndroidTheme {
         DashboardHomeManagerComposablePreview(user = user)
@@ -541,3 +639,16 @@ fun DBHomeManagerPreview() {
 }
 
 
+@Composable
+fun TerrainItem(modifier: Modifier = Modifier, text: String, icon: Int) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = "soccer Pitch Location",
+            modifier = Modifier
+                .size(28.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = text, style = MaterialTheme.typography.titleSmall)
+    }
+}

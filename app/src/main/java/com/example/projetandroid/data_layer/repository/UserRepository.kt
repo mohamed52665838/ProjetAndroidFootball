@@ -76,12 +76,14 @@ class UserRepository @Inject constructor(
         lastName: String?,
         password: String,
         email: String,
+        role: String?,
         phone: String?,
     ): Flow<Events<TokenModel?>> = flow {
         emit(Events.LoadingEvent(data = null))
         val response = userAPI.signup(
             SignUpModel(
                 name = name,
+                role = role,
                 lastname = lastName,
                 password = password,
                 email = email,

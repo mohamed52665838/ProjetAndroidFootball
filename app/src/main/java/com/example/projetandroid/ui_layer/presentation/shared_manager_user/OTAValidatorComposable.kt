@@ -44,6 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.projetandroid.Dashboard
 import com.example.projetandroid.R
+import com.example.projetandroid.SignIn
+import com.example.projetandroid.SignUp
 import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.ui.theme.primaryColor
 import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
@@ -185,7 +187,11 @@ fun OTAValidatorComposable(
                         horizontalArrangement = Arrangement.End
                     ) {
                         OutlinedButton(
-                            onClick = {},
+                            onClick = {
+                                navController.navigate(SignIn) {
+                                    popUpTo(SignIn) { inclusive = true }
+                                }
+                            },
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors()
                         ) {
