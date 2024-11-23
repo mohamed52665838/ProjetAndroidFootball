@@ -1,7 +1,13 @@
 package com.example.projetandroid
 
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 
 val BASE_URL = "http://10.0.2.2:4000"
 val ADDRESS_SEARCH_AP_URI = "https://nominatim.openstreetmap.org"
@@ -98,7 +104,18 @@ enum class SoccerFieldSubmissionFragments {
 
 sealed class UiState {
     data object Idle : UiState()
-    data object Loading : UiState()
-    data class Error(val message: String) : UiState()
-    data class Success(val message: String) : UiState()
+    data class Loading(val message: String? = null) : UiState()
+    data class Error(val message: String, val raisonCode: Int = 0) : UiState()
+    data class Success(val message: String, val operationCode: Int = 0) : UiState()
+}
+
+
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavController): T {
+    val parentNavRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentBackStackEntry = remember(navController) {
+        navController.getBackStackEntry(parentNavRoute)
+    }
+    return hiltViewModel(parentBackStackEntry)
+
 }

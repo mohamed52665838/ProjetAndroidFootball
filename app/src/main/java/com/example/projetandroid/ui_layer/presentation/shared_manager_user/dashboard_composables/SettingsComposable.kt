@@ -33,7 +33,7 @@ import androidx.navigation.NavController
 import com.example.projetandroid.Profile
 import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 import java.util.Stack
 
@@ -78,7 +78,9 @@ fun SettingsComposable(
             callback = {
                 onSignOut()
                 navController.navigate(SignIn) {
-                    popUpTo(0)
+                    popUpTo(0) {
+                        inclusive = true
+                    }
                 }
             }),
     )

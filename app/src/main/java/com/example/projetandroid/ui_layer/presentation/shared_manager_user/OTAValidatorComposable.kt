@@ -46,10 +46,10 @@ import com.example.projetandroid.Dashboard
 import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
 import com.example.projetandroid.SignUp
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.primaryColor
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
-import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.primaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.surfaceColor
 import com.example.projetandroid.ui_layer.viewModels.OTACodeViewModel
 
 
@@ -61,9 +61,6 @@ fun OTAValidatorComposable(
 ) {
 
 
-    viewModel.state.value.data?.let {
-        navController.navigate(Dashboard)
-    }
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -230,17 +227,6 @@ fun OTAValidatorComposable(
 
         }
 
-        if (
-            viewModel.state.value.isLoading
-        )
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
     }
 }
 

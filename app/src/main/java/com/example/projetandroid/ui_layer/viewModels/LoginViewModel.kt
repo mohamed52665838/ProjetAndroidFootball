@@ -13,7 +13,6 @@ import com.example.projetandroid.Fields
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.TokenModel
-import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -31,8 +30,6 @@ class LoginViewModel @Inject constructor(
     var email by mutableStateOf("")
     var password by mutableStateOf("")
 
-    private val _state = mutableStateOf(ScreenState<TokenModel>(data = null))
-    val state: State<ScreenState<TokenModel>> = _state
 
     private var _errorMap = mutableStateMapOf<Fields, String>()
     val errorMap: SnapshotStateMap<Fields, String> = _errorMap
@@ -67,29 +64,23 @@ class LoginViewModel @Inject constructor(
         userRepository.signin(email, password).onEach {
             when (it) {
                 is Events.ErrorEvent -> {
-                    _state.value = ScreenState(errorMessage = it.error)
                 }
 
                 is Events.SuccessEvent -> {
-                    shardPref.putToken(it.data.accessToken, it.data.refreshToken)
-                    _state.value = ScreenState(data = it.data)
                 }
 
                 is Events.LoadingEvent -> {
-                    _state.value = ScreenState(isLoading = true)
                 }
 
                 else -> {}
             }
         }
             .catch {
-                _state.value = ScreenState(errorMessage = it.localizedMessage ?: "unexpected error")
             }
             .launchIn(viewModelScope)
     }
 
     // this one is dangerous please to let me down
     fun clearState() {
-        _state.value = ScreenState()
     }
 }

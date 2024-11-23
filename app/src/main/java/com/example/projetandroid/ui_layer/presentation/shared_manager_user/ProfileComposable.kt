@@ -39,15 +39,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.projetandroid.R
 import com.example.projetandroid.UiState
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.containerColor
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.containerColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.EditProfileFields
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileComposable(
-    viewModel: DashboardViewModel = hiltViewModel(),
+    viewModel: DashboardViewModel,
     navController: NavController
 ) {
 
@@ -155,13 +155,13 @@ fun ProfileComposable(
             )
         }
     }
-    when(activityComposableChannel.value) {
+    when (activityComposableChannel.value) {
         is UiState.Error -> {
-            AlertDialog(onDismissRequest = {  viewModel.profileRestore() }, confirmButton = {
+            AlertDialog(onDismissRequest = { viewModel.profileRestore() }, confirmButton = {
                 TextButton(onClick = {
                     viewModel.profileRestore()
                 }) {
-                    Text(text = "OK" )
+                    Text(text = "OK")
                 }
             },
                 text = {
@@ -169,20 +169,22 @@ fun ProfileComposable(
                 }
             )
         }
+
         is UiState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-               CircularProgressIndicator()
+                CircularProgressIndicator()
             }
 
         }
-        is  UiState.Success -> {
+
+        is UiState.Success -> {
 
             AlertDialog(onDismissRequest = { viewModel.profileRestore() },
                 confirmButton = {
                     TextButton(onClick = {
                         viewModel.profileRestore()
                     }) {
-                        Text(text = "OK" )
+                        Text(text = "OK")
                     }
                 },
                 text = {
@@ -191,6 +193,7 @@ fun ProfileComposable(
             )
 
         }
+
         is UiState.Idle -> {
             // empty
         }

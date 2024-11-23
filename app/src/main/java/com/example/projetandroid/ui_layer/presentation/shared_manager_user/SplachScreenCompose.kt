@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.projetandroid.R
-import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.presentation.theme.surfaceColor
 import kotlinx.coroutines.delay
 
 

@@ -2,6 +2,7 @@ package com.example.projetandroid.ui_layer.presentation.manager
 
 import android.Manifest
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationListener
@@ -40,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,15 +62,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.projetandroid.AddSoccerField
 import com.example.projetandroid.BundledTextField
 import com.example.projetandroid.R
+import com.example.projetandroid.ShardPref
 import com.example.projetandroid.SoccerFieldSubmissionFragments
 import com.example.projetandroid.UiState
+import com.example.projetandroid.data_layer.network.RetrofitInstance
+import com.example.projetandroid.data_layer.network.api.SoccerFieldAPI
+import com.example.projetandroid.data_layer.network.api.UserAPI
+import com.example.projetandroid.data_layer.repository.SoccerFieldRepository
+import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.SoccerField
-import com.example.projetandroid.ui_layer.shared_components.PrimaryButton
-import com.example.projetandroid.ui_layer.shared_components.SecondaryButton
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.shared_components.PrimaryButton
+import com.example.projetandroid.ui_layer.presentation.shared_components.SecondaryButton
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelImp
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelPreview
 import com.google.android.gms.location.LocationServices
@@ -87,13 +96,12 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSoccerFieldComposable(
-    viewModel: AddSoccerFieldViewModelImp = hiltViewModel(),
+    viewModel: AddSoccerFieldViewModelPreview = hiltViewModel(),
     navController: NavController
 ) {
 
     val activity = LocalContext.current
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-
 
     val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
@@ -129,6 +137,7 @@ fun AddSoccerFieldComposable(
 
         }
 
+
     if (ActivityCompat.checkSelfPermission(
             activity,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -141,17 +150,23 @@ fun AddSoccerFieldComposable(
 
     val sharedFlow = viewModel.sharedFlow.collectAsState(initial = UiState.Idle)
 
-    val value = BundledTextField(
-        value = remember {
-            mutableStateOf("")
-        }
-    )
     val mapState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(viewModel.mapLangLat.value, 5f)
     }
     val markerState = rememberMarkerState(position = viewModel.mapLangLat.value)
-
     val coroutineScope = rememberCoroutineScope()
+
+
+    LaunchedEffect(key1 = viewModel.mapLangLat.value) {
+        if (viewModel.isMapLoaded)
+            mapState.animate(
+                CameraUpdateFactory.newLatLngZoom(
+                    viewModel.mapLangLat.value,
+                    18f
+                )
+            )
+        markerState.position = viewModel.mapLangLat.value
+    }
 
     Scaffold(
         topBar = {
@@ -186,33 +201,21 @@ fun AddSoccerFieldComposable(
                                         location.longitude
                                     )
                                 )
-                                markerState.position = LatLng(
-                                    location.latitude,
-                                    location.longitude
-                                )
-                                coroutineScope.launch {
-                                    mapState.animate(
-                                        CameraUpdateFactory.newLatLngZoom(
-                                            LatLng(
-                                                location.latitude,
-                                                location.longitude,
-                                            ),
-                                            15f
-                                        )
-                                    )
-                                }
                             }
                         }
                     }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_my_location_24),
-                            contentDescription = "my location"
-                        )
+                        if (viewModel.soccerFieldSubmissionFragment.value == SoccerFieldSubmissionFragments.MAP_SECOND_FRAGMENT)
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_my_location_24),
+                                contentDescription = "my location"
+                            )
                     }
                 }
             )
         },
     ) {
+
+
         Box(Modifier.padding(it)) {
             AnimatedContent(
                 targetState = viewModel.soccerFieldSubmissionFragment.value,
@@ -304,15 +307,11 @@ fun AddSoccerFieldComposable(
                                                 },
                                                 onMapLongClick = {
                                                     println("clicked $it")
-                                                    coroutineScope.launch {
-                                                        mapState.animate(
-                                                            update = CameraUpdateFactory.newLatLng(
-                                                                it
-                                                            )
-                                                        )
-                                                        markerState.position = it
-                                                        viewModel.changeLatLong(it)
-                                                    }
+                                                    viewModel.changeLatLong(it)
+                                                },
+                                                onMapLoaded = {
+                                                    println("is map loaded is true")
+                                                    viewModel.mapStatus(true)
                                                 }
                                             ) {
                                                 Marker(markerState)
@@ -397,5 +396,9 @@ fun AddSoccerFieldComposable(
 @Composable
 private fun MainPreview() {
     ProjetAndroidTheme {
+        AddSoccerFieldComposable(
+            navController = rememberNavController(),
+        )
     }
 }
+

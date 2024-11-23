@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.shared_components
+package com.example.projetandroid.ui_layer.presentation.shared_components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
@@ -10,12 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 
 
 @Composable
 fun AppTextFieldComposable(
-    modifier: Modifier =  Modifier,
+    modifier: Modifier = Modifier,
     value: String,
     onChange: (value: String) -> Unit,
     error: String? = null,
@@ -32,7 +32,7 @@ fun AppTextFieldComposable(
                     Text(text = it)
                 }
             }
-            )
+        )
         error?.let {
             Text(text = it, style = MaterialTheme.typography.titleSmall, color = Color.Red)
         }
@@ -44,6 +44,11 @@ fun AppTextFieldComposable(
 @Composable
 private fun AppTextFieldComposablePreview() {
     ProjetAndroidTheme {
-        AppTextFieldComposable(value = "Hello There", onChange = {}, label = "Hello There", modifier = Modifier.fillMaxWidth())
+        AppTextFieldComposable(
+            value = "Hello There",
+            onChange = {},
+            label = "Hello There",
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

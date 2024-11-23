@@ -36,13 +36,12 @@ import javax.inject.Inject
 
 
 interface AddSoccerFieldViewModelProtocol {
-    fun giveMeTheModelPlease(): SoccerField?
     fun passSecondFragment()
     fun backFirstForm()
     fun submitSoccerField()
     fun clearFirstForm()
-    fun clearSecondForm()
     fun lookupAddress(city: String)
+    fun resetSharedFlow()
 }
 
 
@@ -50,21 +49,20 @@ abstract class AddSoccerFieldViewModelBase : ViewModel(),
     AddSoccerFieldViewModelProtocol {
     protected val _soccerFieldSubmissionFragment =
         mutableStateOf(SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT)
+
     val soccerFieldSubmissionFragment: State<SoccerFieldSubmissionFragments> =
         _soccerFieldSubmissionFragment
-    protected val _mapLangLat = mutableStateOf<LatLng>(LatLng(33.8869, 9.5375))
-    val mapLangLat: State<LatLng> = _mapLangLat
 
+    protected val _mapLangLat = mutableStateOf(LatLng(33.8869, 9.5375))
+
+    val mapLangLat: State<LatLng> = _mapLangLat
+    var isMapLoaded = false
     val _sharedStateFlow = MutableStateFlow<UiState>(UiState.Idle)
     val sharedFlow: SharedFlow<UiState> = _sharedStateFlow
 
     protected val _listOfAddresses = mutableStateListOf<AddressSearchJson>()
     val listOfAddresses: SnapshotStateList<AddressSearchJson> = _listOfAddresses
 
-
-    fun changeLatLong(latlong: LatLng) {
-        _mapLangLat.value = latlong
-    }
 
     val listViewModel = listOf(
         BundledTextField(
@@ -102,6 +100,41 @@ abstract class AddSoccerFieldViewModelBase : ViewModel(),
             validator = "[0-9]+\\.?[0-9]*".toRegex(),
         ),
     )
+
+
+    fun changeLatLong(latlong: LatLng) {
+        _mapLangLat.value = latlong
+    }
+
+    fun mapStatus(isMapLoadedParam: Boolean) {
+        isMapLoaded = isMapLoadedParam
+    }
+
+    override fun passSecondFragment() {
+        listViewModel.forEach { it.clearValidation() }
+        listViewModel.filter { !it.validate() }.isEmpty().also {
+            if (it)
+                _soccerFieldSubmissionFragment.value =
+                    SoccerFieldSubmissionFragments.MAP_SECOND_FRAGMENT
+        }
+    }
+
+    override fun clearFirstForm() {
+        listViewModel.map {
+            it.value.value = ""
+        }
+    }
+
+    override fun resetSharedFlow() {
+        viewModelScope.launch {
+            _sharedStateFlow.emit(UiState.Idle)
+        }
+    }
+
+    override fun backFirstForm() {
+        _soccerFieldSubmissionFragment.value = SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT
+
+    }
 }
 
 // this will be injected by hilt
@@ -122,40 +155,6 @@ class AddSoccerFieldViewModelImp @Inject constructor(
             .create(AddressSearchApi::class.java)
     )
 
-    override fun giveMeTheModelPlease(): SoccerField? {
-        val notValidated = listViewModel.filter { !it.validate() }
-        if (notValidated.isNotEmpty()) {
-            return null
-        }
-        return null
-    }
-
-    override fun passSecondFragment() {
-        listViewModel.forEach { it.clearValidation() }
-        listViewModel.filter { !it.validate() }.isEmpty().also {
-            if (it)
-                _soccerFieldSubmissionFragment.value =
-                    SoccerFieldSubmissionFragments.MAP_SECOND_FRAGMENT
-        }
-    }
-
-
-    override fun backFirstForm() {
-        _soccerFieldSubmissionFragment.value = SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT
-    }
-
-
-    override fun clearFirstForm() {
-        listViewModel.map {
-            it.value.value = ""
-        }
-    }
-
-    fun resetSharedFlow() {
-        viewModelScope.launch {
-            _sharedStateFlow.emit(UiState.Idle)
-        }
-    }
 
     override fun submitSoccerField() {
         terrainRepository.create(
@@ -181,15 +180,12 @@ class AddSoccerFieldViewModelImp @Inject constructor(
                 }
 
                 is Events.LoadingEvent -> {
-                    _sharedStateFlow.value = UiState.Loading
+                    _sharedStateFlow.value = UiState.Loading()
                 }
             }
         }.launchIn(viewModelScope)
     }
 
-    override fun clearSecondForm() {
-        TODO("Not yet implemented")
-    }
 
     override fun lookupAddress(city: String) {
         _listOfAddresses.clear()
@@ -218,6 +214,7 @@ class AddSoccerFieldViewModelImp @Inject constructor(
 // this one for testing purpose
 class AddSoccerFieldViewModelPreview : AddSoccerFieldViewModelBase() {
 
+    //  initialize repository
     val repository = AddressLookupRepository(
         RetrofitInstance.getAddressLockupRetrofitInstance()
             .newBuilder().client(
@@ -228,43 +225,11 @@ class AddSoccerFieldViewModelPreview : AddSoccerFieldViewModelBase() {
             .create(AddressSearchApi::class.java)
     )
 
-    override fun giveMeTheModelPlease(): SoccerField? {
-        val notValidated = listViewModel.filter { !it.validate() }
-        if (notValidated.isNotEmpty()) {
-            return null
-        }
-        return null
-    }
-
-    override fun passSecondFragment() {
-        listViewModel.forEach { it.clearValidation() }
-        listViewModel.filter { !it.validate() }.isEmpty().also {
-            if (it)
-                _soccerFieldSubmissionFragment.value =
-                    SoccerFieldSubmissionFragments.MAP_SECOND_FRAGMENT
-        }
-    }
-
-
-    override fun backFirstForm() {
-        _soccerFieldSubmissionFragment.value = SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT
-    }
-
-
-    override fun clearFirstForm() {
-        listViewModel.map {
-            it.value.value = ""
-        }
-    }
-
 
     override fun submitSoccerField() {
-        TODO("Not yet implemented")
+        println("Here we gonna submit our form")
     }
 
-    override fun clearSecondForm() {
-        TODO("Not yet implemented")
-    }
 
     override fun lookupAddress(city: String) {
         _listOfAddresses.clear()
@@ -287,6 +252,7 @@ class AddSoccerFieldViewModelPreview : AddSoccerFieldViewModelBase() {
         }.launchIn(viewModelScope)
 
     }
+
 }
 
 

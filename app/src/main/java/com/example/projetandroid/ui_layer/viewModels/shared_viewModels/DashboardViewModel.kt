@@ -15,7 +15,6 @@ import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.SoccerField
 import com.example.projetandroid.model.UpdateModel
 import com.example.projetandroid.model.User
-import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -77,8 +76,6 @@ class DashboardViewModel @Inject constructor(
     private var _errorMap = mutableStateMapOf<EditProfileFields, String>()
     val errorMap: SnapshotStateMap<EditProfileFields, String> = _errorMap
 
-    private val _state = mutableStateOf(ScreenState<User>(data = null))
-    val state: State<ScreenState<User>> = _state
 
     private val _isAccountDeleted = mutableStateOf(false)
     val isAccountDeleted: State<Boolean> = _isAccountDeleted
@@ -88,20 +85,21 @@ class DashboardViewModel @Inject constructor(
 
 
     private val _homeUiState = MutableStateFlow<UiState>(UiState.Idle)
-    val homeUiState: SharedFlow<UiState>  = _homeUiState
+    val homeUiState: SharedFlow<UiState> = _homeUiState
 
     fun homeRestore() {
-       _homeUiState.value = UiState.Idle
+        _homeUiState.value = UiState.Idle
     }
 
     private val _activityUiState = MutableStateFlow<UiState>(UiState.Idle)
-    val activityUiState: SharedFlow<UiState>  = _activityUiState
+    val activityUiState: SharedFlow<UiState> = _activityUiState
 
     fun activityRestore() {
         _homeUiState.value = UiState.Idle
     }
+
     private val _profileUiState = MutableStateFlow<UiState>(UiState.Idle)
-    val profileUiState: SharedFlow<UiState>  = _profileUiState
+    val profileUiState: SharedFlow<UiState> = _profileUiState
 
     fun profileRestore() {
         _profileUiState.value = UiState.Idle
@@ -124,7 +122,6 @@ class DashboardViewModel @Inject constructor(
             when (it) {
 
                 is Events.ErrorEvent -> {
-                    _state.value = ScreenState(errorMessage = it.error)
                 }
 
                 is Events.SuccessEvent -> {
@@ -142,13 +139,14 @@ class DashboardViewModel @Inject constructor(
                         soccerFieldRepository.own(token).onEach {
                             when (it) {
                                 is Events.LoadingEvent -> {
-                                    _homeUiState.emit(UiState.Loading)
+                                    _homeUiState.emit(UiState.Loading())
                                 }
+
                                 is Events.ErrorEvent -> {
                                     if (it.error == "HNSF") {
                                         _homeUiState.emit(UiState.Error("-1"))
                                     } else {
-                                       _homeUiState.emit(UiState.Error(it.error))
+                                        _homeUiState.emit(UiState.Error(it.error))
                                     }
                                 }
 
@@ -162,7 +160,6 @@ class DashboardViewModel @Inject constructor(
                 }
 
                 is Events.LoadingEvent -> {
-                    _state.value = ScreenState(isLoading = true)
                 }
             }
         }.launchIn(viewModelScope)
@@ -207,11 +204,11 @@ class DashboardViewModel @Inject constructor(
             .onEach {
                 when (it) {
                     is Events.ErrorEvent -> {
-                        _profileUiState.emit(UiState.Error( it.error ))
+                        _profileUiState.emit(UiState.Error(it.error))
                     }
 
                     is Events.LoadingEvent -> {
-                        _profileUiState.emit(UiState.Loading)
+                        _profileUiState.emit(UiState.Loading())
                     }
 
                     is Events.SuccessEvent -> {
@@ -219,14 +216,13 @@ class DashboardViewModel @Inject constructor(
                         it.data!!
                         user = it.data
                     }
+
                     else -> {}
                 }
 
             }
             .catch {
-                _state.value = ScreenState(
-                    errorMessage = it.localizedMessage ?: "unexpected error just happened"
-                )
+
             }
             .launchIn(viewModelScope)
     }
@@ -246,12 +242,13 @@ class DashboardViewModel @Inject constructor(
                     }
 
                     is Events.LoadingEvent -> {
-                        _homeUiState.emit(UiState.Loading)
+                        _homeUiState.emit(UiState.Loading())
                     }
 
                     is Events.SuccessEvent -> {
                         _isAccountDeleted.value = true
                     }
+
                     else -> {}
                 }
 
@@ -263,6 +260,9 @@ class DashboardViewModel @Inject constructor(
         shardPref.clearToken()
     }
 
-
+    override fun onCleared() {
+        super.onCleared()
+        println("view Model Cleaned up")
+    }
 
 }

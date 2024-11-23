@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.shared_components
+package com.example.projetandroid.ui_layer.presentation.shared_components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.projetandroid.ui_layer.ui.theme.primaryColor
-import com.example.projetandroid.ui_layer.ui.theme.tertiaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.primaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.tertiaryColor
 
 @Composable
 fun PrimaryButton(

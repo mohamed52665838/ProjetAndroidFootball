@@ -50,11 +50,11 @@ import com.example.projetandroid.CodeOTP
 import com.example.projetandroid.R
 import com.example.projetandroid.SignUpFragments
 import com.example.projetandroid.SignupFields
-import com.example.projetandroid.ui_layer.shared_components.DropdownComposableApp
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
-import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.presentation.shared_components.DropdownComposableApp
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.primaryColorVariant
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.surfaceColor
 import com.example.projetandroid.ui_layer.viewModels.SignupViewModel
 
 
@@ -298,30 +298,6 @@ fun SignupComposable(
     var userOrManager by rememberSaveable {
         mutableStateOf(optionsList[0])
     }
-
-    viewModel.currentScreenState.value.errorMessage?.let {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.clearNetworkError()
-            },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.clearNetworkError()
-                }) {
-                    Text("OK", style = MaterialTheme.typography.bodyMedium)
-                }
-            },
-            text = {
-                Text(text = it)
-            }
-        )
-    }
-
-
-    viewModel.currentScreenState.value.data?.let {
-        navController.navigate(CodeOTP(email = viewModel.email))
-    }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -666,18 +642,6 @@ fun SignupComposable(
                 }
             }
         }
-
-        if (
-            viewModel.currentScreenState.value.isLoading
-        )
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
     }
 }
 

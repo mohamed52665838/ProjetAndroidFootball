@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.shared_components
+package com.example.projetandroid.ui_layer.presentation.shared_components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
@@ -29,7 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.projetandroid.R
-import com.example.projetandroid.ui_layer.ui.theme.containerColor
+import com.example.projetandroid.ui_layer.presentation.theme.containerColor
 
 @Composable
 fun DropdownComposableApp(

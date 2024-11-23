@@ -1,4 +1,4 @@
-package com.example.projetandroid.ui_layer.shared_components
+package com.example.projetandroid.ui_layer.presentation.shared_components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.projetandroid.R
 import com.example.projetandroid.model.MatchModel
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 
 @Composable
 fun MatchViewPresentation(
@@ -69,7 +69,8 @@ fun MatchViewPresentation(
                         )
                     }
                     Row {
-                        Icon( painter = painterResource(id = R.drawable.baseline_groups_24),
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_groups_24),
                             contentDescription = "Location",
                             modifier = Modifier.size(24.dp)
                         )

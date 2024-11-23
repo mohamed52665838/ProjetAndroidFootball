@@ -50,10 +50,10 @@ import com.example.projetandroid.Dashboard
 import com.example.projetandroid.Fields
 import com.example.projetandroid.R
 import com.example.projetandroid.SignUp
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.primaryColorVariant
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
-import com.example.projetandroid.ui_layer.ui.theme.surfaceColor
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.primaryColorVariant
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.surfaceColor
 import com.example.projetandroid.ui_layer.viewModels.LoginViewModel
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelBase
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelImp
@@ -72,54 +72,7 @@ fun LoginComposable(
     var isShowAlertDialog by rememberSaveable {
         mutableStateOf(false)
     }
-    val screenState = viewModel.state
 
-    screenState.value.errorMessage?.let {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.clearState()
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.clearState()
-                }) {
-                    Text("OK")
-                }
-            },
-            text = {
-                Text(it)
-            }
-        )
-    }
-
-    screenState.value.data?.let {
-        navController.navigate(Dashboard) {
-            popUpTo(0)
-        }
-    }
-
-    screenState.value.errorMessage?.let {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.clearState()
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.clearState()
-                }) {
-                    Text("OK", style = MaterialTheme.typography.bodySmall)
-                }
-            },
-            text = {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        )
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -344,18 +297,6 @@ fun LoginComposable(
                 }
             }
         }
-        if (screenState.value.isLoading) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-
-
     }
 }
 

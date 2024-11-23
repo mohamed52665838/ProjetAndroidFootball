@@ -4,7 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.dagger.hilt.android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -84,8 +84,11 @@ dependencies {
     val hilt = "2.50"
     implementation("com.google.dagger:hilt-android:$hilt")
     implementation(libs.logging.interceptor)
-    kapt("com.google.dagger:hilt-compiler:$hilt")
     implementation("com.google.maps.android:maps-compose:5.0.1")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.navigation.fragment)
+    implementation("com.google.dagger:hilt-android:$hilt")
+    ksp("com.google.dagger:hilt-compiler:$hilt")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
 }

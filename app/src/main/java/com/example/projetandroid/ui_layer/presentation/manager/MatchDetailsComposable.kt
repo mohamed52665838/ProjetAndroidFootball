@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.projetandroid.R
-import com.example.projetandroid.ui_layer.shared_components.TextLabel
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.shared_components.TextLabel
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 
 // manager view
 @Composable

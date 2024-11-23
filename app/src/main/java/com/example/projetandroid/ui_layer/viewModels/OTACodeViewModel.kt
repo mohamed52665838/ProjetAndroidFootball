@@ -10,7 +10,6 @@ import com.example.projetandroid.Events
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.model.Message
-import com.example.projetandroid.ui_layer.shared.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -25,11 +24,7 @@ class OTACodeViewModel @Inject constructor(
 
     var code by mutableStateOf("")
 
-    private val _state = mutableStateOf(ScreenState<Message>(data = null))
-    val state: State<ScreenState<Message>> = _state
-
     fun clearState() {
-        _state.value = ScreenState()
     }
 
 
@@ -37,22 +32,17 @@ class OTACodeViewModel @Inject constructor(
         userRepository.verifyOtp(email, code).onEach {
             when (it) {
                 is Events.ErrorEvent -> {
-                    _state.value = ScreenState(errorMessage = it.error)
                 }
 
                 is Events.SuccessEvent -> {
-                    _state.value = ScreenState(data = it.data)
                 }
 
                 is Events.LoadingEvent -> {
-                    _state.value = ScreenState(isLoading = true)
                 }
 
                 else -> {}
             }
         }.catch {
-            _state.value =
-                ScreenState(errorMessage = it.localizedMessage ?: "unexpected error just happened")
         }
             .launchIn(viewModelScope)
     }

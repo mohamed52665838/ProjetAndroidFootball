@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,7 +31,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type.statusBars
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,10 +52,11 @@ import com.example.projetandroid.ui_layer.presentation.shared_manager_user.Profi
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.SettingsComposable
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.SignupComposable
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.DashboardScaffold
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.reflect.TypeVariable
 
 
 @AndroidEntryPoint
@@ -120,14 +125,22 @@ class MainActivity : ComponentActivity() {
                         }
                         navigation<Dashboard>(startDestination = DashboardScaffold) {
                             composable<DashboardScaffold> {
+                                val parentEntry = remember(it) {
+                                    androidNavController.getBackStackEntry(Dashboard)
+                                }
+                                val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
                                 DashboardScaffold(
-                                    viewModel = hiltViewModel(),
+                                    viewModel = viewModel,
                                     androidNavController = androidNavController,
                                 )
                             }
                             composable<Profile> {
+                                val parentEntry = remember(it) {
+                                    androidNavController.getBackStackEntry(Dashboard)
+                                }
+                                val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
                                 ProfileComposable(
-                                    viewModel = hiltViewModel(),
+                                    viewModel = viewModel,
                                     navController = androidNavController
                                 )
                             }

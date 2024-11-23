@@ -53,9 +53,9 @@ import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
 import com.example.projetandroid.UiState
 import com.example.projetandroid.model.User
-import com.example.projetandroid.ui_layer.shared_components.TextLabel
-import com.example.projetandroid.ui_layer.ui.theme.ProjetAndroidTheme
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.shared_components.TextLabel
+import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -289,53 +289,6 @@ fun DashboardComposable(
 
 
         // event  handling (loading, ...)
-        when (activityComposableChannel.value) {
-            is UiState.Error -> {
-                if ((activityComposableChannel.value as UiState.Error).message == "-1") {
-                    navController.navigate(AddSoccerField)
-                    viewModel.homeRestore()
-                } else {
-                    AlertDialog(onDismissRequest = { viewModel.homeRestore() }, confirmButton = {
-                        TextButton(onClick = {
-                            viewModel.activityRestore()
-                        }) {
-                            Text(text = "OK")
-                        }
-                    },
-                        text = {
-                            Text(text = (activityComposableChannel.value as UiState.Error).message)
-                        }
-                    )
-                }
-            }
-
-            is UiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is UiState.Success -> {
-
-                AlertDialog(onDismissRequest = { viewModel.homeRestore() },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            viewModel.homeRestore()
-                        }) {
-                            Text(text = "OK")
-                        }
-                    },
-                    text = {
-                        Text(text = (activityComposableChannel.value as UiState.Success).message)
-                    }
-                )
-
-            }
-
-            is UiState.Idle -> {
-                // empty
-            }
-        }
     }
 }
 

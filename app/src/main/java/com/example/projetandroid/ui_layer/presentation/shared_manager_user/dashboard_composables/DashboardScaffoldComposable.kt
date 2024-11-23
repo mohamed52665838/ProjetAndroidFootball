@@ -32,7 +32,7 @@ import com.example.projetandroid.R
 import com.example.projetandroid.Settings
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.DashboardComposable
 import com.example.projetandroid.ui_layer.presentation.shared_manager_user.dashboard_composables.DashboardState
-import com.example.projetandroid.ui_layer.ui.theme.secondaryColor
+import com.example.projetandroid.ui_layer.presentation.theme.secondaryColor
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 
 @Composable

@@ -16,7 +16,6 @@ import com.example.projetandroid.SignupFields
 import com.example.projetandroid.data_layer.repository.UserRepositoryStandards
 import com.example.projetandroid.model.TokenModel
 import com.example.projetandroid.model.User
-import com.example.projetandroid.ui_layer.shared.ScreenState
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -45,8 +44,6 @@ class SignupViewModel @Inject constructor(
     private var _errorMap = mutableStateMapOf<SignupFields, String>()
     val errorMap: SnapshotStateMap<SignupFields, String> = _errorMap
 
-    private val _currentScreenState = mutableStateOf(ScreenState<TokenModel>())
-    val currentScreenState: State<ScreenState<TokenModel>> = _currentScreenState
 
     private val _currentScreen = mutableStateOf(SignUpFragments.FIRST_FRAGMENT)
     val currentScreen: State<SignUpFragments> = _currentScreen
@@ -64,10 +61,6 @@ class SignupViewModel @Inject constructor(
         name = ""
         lastname = ""
         phoneNumber = ""
-    }
-
-    fun clearNetworkError() {
-        _currentScreenState.value = ScreenState()
     }
 
 
@@ -137,40 +130,31 @@ class SignupViewModel @Inject constructor(
         ).onEach {
             when (it) {
                 is Events.ErrorEvent -> {
-                    _currentScreenState.value = ScreenState(errorMessage = it.error)
                 }
 
                 is Events.SuccessEvent -> {
                     userRepository.sendOtp(email).onEach { message ->
                         when (message) {
                             is Events.ErrorEvent -> {
-                                _currentScreenState.value = ScreenState(errorMessage = it.error)
                             }
 
                             is Events.LoadingEvent -> {
-                                _currentScreenState.value =
-                                    ScreenState(data = null, isLoading = true)
                             }
 
                             is Events.SuccessEvent -> {
                                 it.data!!
                                 shardPref.putToken(it.data.accessToken, it.data.refreshToken)
-                                _currentScreenState.value = ScreenState(data = it.data)
                             }
 
                             else -> {}
                         }
                     }.catch {
-                        _currentScreenState.value = ScreenState(
-                            errorMessage = it.localizedMessage ?: "unexpected error happened"
-                        )
                     }
                         .launchIn(viewModelScope)
 
                 }
 
                 is Events.LoadingEvent -> {
-                    _currentScreenState.value = ScreenState(isLoading = true)
                 }
 
                 else -> {}
