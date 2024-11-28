@@ -122,24 +122,46 @@ class SoccerFieldRepository @Inject constructor(
     override fun own(token: String): Flow<Events<SoccerField?>> = flow {
         emit(Events.LoadingEvent(data = null))
         val response = SoccerFieldAPI.own(TOKEN_TYPE + token)
-
         if (!response.isSuccessful) {
-            emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
-        } else {
-            if (response.body()?.status == false) {
+            /* return true status code in 200 & 300 */
+            /* handel errors between [0..199] and [300 ..[ */
+            if (response.code() in intArrayOf(400, 422)) {
+                /* known status code */
                 emit(
                     Events.ErrorEvent(
-                        error = fromStateCodeToDeveloperMessage(
-                            response.code(),
-                            replacement = response.body()?.error?.joinToString { "\n" }
-                                ?: "unexpected error just happened"),
-                    ))
+                        error = "make sure, you have filled all data, if so rapport issue"
+                    )
+                )
+            } else if (response.code() == 409) {
+                emit(
+                    Events.ErrorEvent(
+                        error = "email already exists"
+                    )
+                )
             } else {
-                response.body()?.data?.let {
-                    emit(Events.SuccessEvent(it))
+                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
+            }
+        } else {
+            // status code in [200, 300]
+            /* 90% the body is exists */
+            response.body()?.let { responseType ->
+                // body it self may have errors in this range
+                responseType.error?.let {
+                    emit(
+                        Events.ErrorEvent(
+                            error = fromStateCodeToDeveloperMessage(
+                                response.code(),
+                                replacement = it.joinToString("\n")
+                            )
+                        )
+                    )
                 } ?: run {
-                    emit(Events.ErrorEvent(error = "HNSF")) // work with have no soccer field
+                    // in this cause we are sure no errors
+                    emit(Events.SuccessEvent(data = responseType.data))
                 }
+            } ?: run {
+                // empty body suddenly we don't have any indicator
+                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(0)))
             }
         }
     }

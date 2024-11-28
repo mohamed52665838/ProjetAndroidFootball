@@ -4,10 +4,13 @@ import android.app.Application
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.data_layer.network.RetrofitInstance
 import com.example.projetandroid.data_layer.network.api.AddressSearchApi
+import com.example.projetandroid.data_layer.network.api.MatchAPI
 import com.example.projetandroid.data_layer.network.api.SoccerFieldAPI
 import com.example.projetandroid.data_layer.network.api.UserAPI
 import com.example.projetandroid.data_layer.repository.AddressLookupRepository
 import com.example.projetandroid.data_layer.repository.AddressLookupRepositoryStandards
+import com.example.projetandroid.data_layer.repository.MatchRepository
+import com.example.projetandroid.data_layer.repository.MatchRepositoryStandards
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.data_layer.repository.UserRepositoryStandards
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelBase
@@ -18,6 +21,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 @Module
@@ -30,10 +34,20 @@ class AppModule {
     }
 
     @Provides
+    fun getMatchAPI(): MatchAPI {
+        return RetrofitInstance.getInstance().newBuilder()
+            .addConverterFactory(GsonConverterFactory.create()).build().create(MatchAPI::class.java)
+    }
+
+    @Provides
     fun getUserRepository(userAPI: UserAPI): UserRepositoryStandards {
         return UserRepository(userAPI)
     }
 
+    @Provides
+    fun getMatchRepository(matchAPI: MatchAPI): MatchRepositoryStandards {
+        return MatchRepository(matchAPI)
+    }
 
     @Provides
     fun getAddressLookupRepository(addressSearchApi: AddressSearchApi): AddressLookupRepositoryStandards {

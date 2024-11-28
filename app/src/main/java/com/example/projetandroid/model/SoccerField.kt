@@ -7,6 +7,8 @@ data class SoccerField(
     val label: String?,
     val latitude: String?,
     val longitude: String?,
+    val address: String = "simple address",
     val price: Double?,
-    val width: Double?
+    val width: Double?,
+    val matchsIn: List<String>? = null
 )

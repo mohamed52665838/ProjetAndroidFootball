@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.gson)
 
+    implementation(libs.androidx.lifecycle.viewmodel.compose.v287)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.compose)
@@ -82,7 +83,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
     val hilt = "2.50"
-    implementation("com.google.dagger:hilt-android:$hilt")
+    implementation(libs.hilt.android)
     implementation(libs.logging.interceptor)
     implementation("com.google.maps.android:maps-compose:5.0.1")
     implementation("androidx.activity:activity-ktx:1.9.3")

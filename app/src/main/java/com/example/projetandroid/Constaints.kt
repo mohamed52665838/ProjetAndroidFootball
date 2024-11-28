@@ -8,6 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import java.lang.reflect.TypeVariable
 
 val BASE_URL = "http://10.0.2.2:4000"
 val ADDRESS_SEARCH_AP_URI = "https://nominatim.openstreetmap.org"
@@ -21,9 +22,7 @@ enum class Fields {
 enum class SignupFields {
     EMAIL,
     PASSWORD,
-    CONFIRMATION,
-    NAME,
-    LASTNAME,
+    FULLNAME,
     PHONE_NUMBER
 }
 
@@ -76,6 +75,7 @@ data class BundledTextField(
     val keyboardOptions: KeyboardOptions? = null
 ) {
     fun validate(): Boolean {
+        value.value = value.value.trim()
         onErrorMessage?.let { errorMessage ->
             validator?.let { validator_ ->
                 if (value.value.matches(validator_)) {
@@ -107,6 +107,10 @@ sealed class UiState {
     data class Loading(val message: String? = null) : UiState()
     data class Error(val message: String, val raisonCode: Int = 0) : UiState()
     data class Success(val message: String, val operationCode: Int = 0) : UiState()
+    data class NavigateEvent(
+        val message: String? = null,
+        val navigation: NavController.() -> Unit,
+    ) : UiState()
 }
 
 
@@ -119,3 +123,22 @@ inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navControll
     return hiltViewModel(parentBackStackEntry)
 
 }
+
+
+enum class Role {
+    MANAGER,
+    USER
+}
+
+enum class ProfileUpdate {
+    FIRST_NAME,
+    LAST_NAME,
+    PHONE_NUMBER,
+    EMAIL
+}
+
+
+fun translateRole(role: Role): String {
+    return role.name.lowercase()
+}
+

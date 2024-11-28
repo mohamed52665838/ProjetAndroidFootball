@@ -1,5 +1,6 @@
 package com.example.projetandroid.ui_layer.presentation.shared_components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.projetandroid.AddSoccerField
 import com.example.projetandroid.R
 import com.example.projetandroid.UiState
@@ -27,76 +30,101 @@ import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 
 @Composable
 fun HandleUIEvents(
+    modifier: Modifier = Modifier,
     uiState: UiState,
+    navController: NavController,
     onDone: (() -> Unit)? = null,
-    operation: (() -> Unit)? = null
 ) {
 
-    when (uiState) {
-        is UiState.Error -> {
-            AlertDialog(onDismissRequest = { onDone?.invoke() }, confirmButton = {
-                TextButton(onClick = {
-                    onDone?.invoke()
-                }) {
-                    Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
-                }
-            },
-                text = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.outline_error_outline_24),
-                            contentDescription = "hello world",
-                            tint = Color.Red
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = uiState.message, style = MaterialTheme.typography.titleMedium)
-                    }
-                }
-            )
-        }
 
-        is UiState.Loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is UiState.Success -> {
-            AlertDialog(onDismissRequest = { onDone?.invoke() },
-                confirmButton = {
+    Box(modifier = modifier) {
+        when (uiState) {
+            is UiState.Error -> {
+                AlertDialog(onDismissRequest = { onDone?.invoke() }, confirmButton = {
                     TextButton(onClick = {
                         onDone?.invoke()
                     }) {
                         Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
                     }
                 },
-                text = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.outline_check_circle_24),
-                            contentDescription = "hello world",
-                            tint = Color.Green
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = uiState.message, style = MaterialTheme.typography.titleMedium)
+                    text = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_error_outline_24),
+                                contentDescription = "hello world",
+                                tint = Color.Red
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = uiState.message,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        is UiState.Idle -> {
-            // empty
-        }
+            is UiState.Loading -> {
+                AlertDialog(onDismissRequest = { onDone?.invoke() },
+                    confirmButton = {},
+                    text = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = uiState.message ?: "Loading...")
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                )
+            }
 
+            is UiState.Success -> {
+                AlertDialog(onDismissRequest = { onDone?.invoke() },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            onDone?.invoke()
+                        }) {
+                            Text(text = "OK", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    },
+                    text = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_check_circle_24),
+                                contentDescription = "hello world",
+                                tint = Color.Green
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = uiState.message,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                )
+            }
+
+            is UiState.NavigateEvent -> {
+                val navigation = uiState.navigation
+                navigation(navController)
+            }
+
+            is UiState.Idle -> {
+                // empty
+            }
+
+        }
     }
-
-    operation?.invoke()
 }
 
 
@@ -106,6 +134,6 @@ private fun ShowExamples() {
 
     val uiState = UiState.Success(message = "Big Success")
     ProjetAndroidTheme {
-        HandleUIEvents(uiState = uiState)
+        HandleUIEvents(uiState = uiState, navController = rememberNavController())
     }
 }

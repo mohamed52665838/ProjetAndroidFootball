@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.BundledTextField
@@ -23,6 +24,7 @@ import com.example.projetandroid.model.AddressSearchJson
 import com.example.projetandroid.model.SoccerField
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -47,26 +49,35 @@ interface AddSoccerFieldViewModelProtocol {
 
 abstract class AddSoccerFieldViewModelBase : ViewModel(),
     AddSoccerFieldViewModelProtocol {
-    protected val _soccerFieldSubmissionFragment =
-        mutableStateOf(SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT)
 
+    // variables to handle transitions between screens ( 2 screen )
+    private val _soccerFieldSubmissionFragment =
+        mutableStateOf(SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT)
     val soccerFieldSubmissionFragment: State<SoccerFieldSubmissionFragments> =
         _soccerFieldSubmissionFragment
 
+    // variables to handle map interaction
     protected val _mapLangLat = mutableStateOf(LatLng(33.8869, 9.5375))
-
     val mapLangLat: State<LatLng> = _mapLangLat
+
+
+    // variables to handle screen state (events, interactions)
     var isMapLoaded = false
-    val _sharedStateFlow = MutableStateFlow<UiState>(UiState.Idle)
+    var isEnabled = mutableStateOf(true)
+    protected val _sharedStateFlow = MutableStateFlow<UiState>(UiState.Idle)
     val sharedFlow: SharedFlow<UiState> = _sharedStateFlow
 
+
+    // variables to handle search by address
     protected val _listOfAddresses = mutableStateListOf<AddressSearchJson>()
     val listOfAddresses: SnapshotStateList<AddressSearchJson> = _listOfAddresses
 
 
+    // text fields
     val listViewModel = listOf(
         BundledTextField(
-            mutableStateOf(""), label = "Soccer Field Name",
+            mutableStateOf(""),
+            label = "Soccer Field Name",
             supportErrorMessage = "value must be at least 4 characters",
             onErrorMessage = mutableStateOf(null),
             validator = "[a-zA-Z0-9 ]{4,}".toRegex(),
@@ -133,28 +144,16 @@ abstract class AddSoccerFieldViewModelBase : ViewModel(),
 
     override fun backFirstForm() {
         _soccerFieldSubmissionFragment.value = SoccerFieldSubmissionFragments.FORM_FIRST_FRAGMENT
-
     }
 }
 
 // this will be injected by hilt
 @HiltViewModel
 class AddSoccerFieldViewModelImp @Inject constructor(
-    private val userRepository: UserRepository,
     private val terrainRepository: SoccerFieldRepository,
+    private val savedStateHandle: SavedStateHandle,
     private val shardPref: ShardPref
 ) : AddSoccerFieldViewModelBase() {
-
-    val repository = AddressLookupRepository(
-        RetrofitInstance.getAddressLockupRetrofitInstance()
-            .newBuilder().client(
-                OkHttpClient().newBuilder()
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .build()
-            ).build()
-            .create(AddressSearchApi::class.java)
-    )
-
 
     override fun submitSoccerField() {
         terrainRepository.create(
@@ -162,24 +161,30 @@ class AddSoccerFieldViewModelImp @Inject constructor(
             SoccerField(
                 date = LocalDate.now().toString(),
                 description = "",
+
                 height = listViewModel[2].value.value.toDouble(),
                 width = listViewModel[1].value.value.toDouble(),
                 price = listViewModel[3].value.value.toDouble(),
-                label = listViewModel[0].label ?: "unspecified",
+                label = listViewModel[0].value.value,
                 latitude = _mapLangLat.value.latitude.toString(),
                 longitude = _mapLangLat.value.longitude.toString()
             )
         ).onEach {
             when (it) {
                 is Events.SuccessEvent -> {
-                    _sharedStateFlow.value = UiState.Success("Terrain Added With Success State")
+                    isEnabled.value = true
+                    savedStateHandle["200"] = "OK"
+                    _sharedStateFlow.value =
+                        UiState.Success("Soccer filed Added With Success State")
                 }
 
                 is Events.ErrorEvent -> {
+                    isEnabled.value = true
                     _sharedStateFlow.value = UiState.Error("Got Problem: ${it.error}")
                 }
 
                 is Events.LoadingEvent -> {
+                    isEnabled.value = false
                     _sharedStateFlow.value = UiState.Loading()
                 }
             }
@@ -188,69 +193,26 @@ class AddSoccerFieldViewModelImp @Inject constructor(
 
 
     override fun lookupAddress(city: String) {
-        _listOfAddresses.clear()
-        repository.getAddressByCity(city).onEach {
-            when (it) {
-                is Events.SuccessEvent -> {
-                    _listOfAddresses.addAll(it.data)
-                }
-
-                is Events.ErrorEvent -> {
-                    _listOfAddresses.clear()
-                    println(it.error)
-                }
-
-                is Events.LoadingEvent -> {
-                    _listOfAddresses.clear()
-                    println("loading")
-                }
-            }
-        }.launchIn(viewModelScope)
-
     }
-
 }
 
 // this one for testing purpose
 class AddSoccerFieldViewModelPreview : AddSoccerFieldViewModelBase() {
 
+
     //  initialize repository
-    val repository = AddressLookupRepository(
-        RetrofitInstance.getAddressLockupRetrofitInstance()
-            .newBuilder().client(
-                OkHttpClient().newBuilder()
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .build()
-            ).build()
-            .create(AddressSearchApi::class.java)
-    )
-
-
     override fun submitSoccerField() {
-        println("Here we gonna submit our form")
+        viewModelScope.launch {
+            isEnabled.value = false
+            _sharedStateFlow.emit(UiState.Loading("Adding soccer field"))
+            delay(1000)
+            _sharedStateFlow.emit(UiState.Success(message = "Soccer field added successfully"))
+            // return input init state
+            isEnabled.value = true
+        }
     }
 
-
     override fun lookupAddress(city: String) {
-        _listOfAddresses.clear()
-        repository.getAddressByCity(city).onEach {
-            when (it) {
-                is Events.SuccessEvent -> {
-                    _listOfAddresses.addAll(it.data)
-                }
-
-                is Events.ErrorEvent -> {
-                    _listOfAddresses.clear()
-                    println(it.error)
-                }
-
-                is Events.LoadingEvent -> {
-                    _listOfAddresses.clear()
-                    println("loading")
-                }
-            }
-        }.launchIn(viewModelScope)
-
     }
 
 }

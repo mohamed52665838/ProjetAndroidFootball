@@ -2,6 +2,8 @@ package com.example.projetandroid.ui_layer.presentation.shared_components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -21,7 +23,7 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    content: @Composable () -> Unit,
+    content: @Composable (() -> Unit),
 ) {
     Button(
         modifier = modifier,
@@ -35,12 +37,13 @@ fun PrimaryButton(
 
 }
 
+
 @Composable
 fun SecondaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    content: @Composable () -> Unit,
+    content: @Composable (() -> Unit),
 ) {
     OutlinedButton(
         onClick = onClick,
