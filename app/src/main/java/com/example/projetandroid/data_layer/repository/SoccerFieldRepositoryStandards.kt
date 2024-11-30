@@ -10,11 +10,11 @@ import retrofit2.http.POST
 
 interface SoccerFieldRepositoryStandards {
 
-    fun create(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>>
-    fun update(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>>
-    fun delete(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>>
-    fun own(token: String): Flow<Events<SoccerField?>>
-    fun allSoccerFields(): Flow<Events<List<SoccerField>?>>
+    fun create(token: String, soccerField: SoccerField): Flow<Events<SoccerField>>
+    fun update(token: String, soccerField: SoccerField): Flow<Events<SoccerField>>
+    fun delete(token: String, soccerField: SoccerField): Flow<Events<SoccerField>>
+    fun own(token: String): Flow<Events<SoccerField>>
+    fun allSoccerFields(): Flow<Events<List<SoccerField>>>
 
 
 }

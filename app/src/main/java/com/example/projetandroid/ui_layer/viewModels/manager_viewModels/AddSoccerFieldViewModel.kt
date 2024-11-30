@@ -161,7 +161,6 @@ class AddSoccerFieldViewModelImp @Inject constructor(
             SoccerField(
                 date = LocalDate.now().toString(),
                 description = "",
-
                 height = listViewModel[2].value.value.toDouble(),
                 width = listViewModel[1].value.value.toDouble(),
                 price = listViewModel[3].value.value.toDouble(),

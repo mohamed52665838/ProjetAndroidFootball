@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.BundledTextField
 import com.example.projetandroid.Dashboard
+import com.example.projetandroid.Dismiss
 import com.example.projetandroid.Events
 import com.example.projetandroid.R
 import com.example.projetandroid.ShardPref
@@ -87,7 +88,12 @@ class LoginViewModel @Inject constructor(
                     }
 
                     is Events.ErrorEvent -> {
-                        uiStateFlow.emit(UiState.Error(message = it.error))
+                        uiStateFlow.emit(
+                            UiState.Error(
+                                message = it.error,
+                                dismiss = Dismiss.DismissState(dismiss = { resetUiState() })
+                            )
+                        )
                     }
 
                     is Events.SuccessEvent -> {
@@ -96,15 +102,21 @@ class LoginViewModel @Inject constructor(
                             UiState.NavigateEvent(
                                 message = "welcome back",
                                 navigation = {
-                                    navigate(Dashboard)
-                                })
+                                    navigate(Dashboard) {
+                                        popUpTo(0) {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
+                            )
                         )
                     }
                 }
             }.catch {
                 uiStateFlow.emit(
                     UiState.Error(
-                        it.localizedMessage ?: "unexpected error just happened"
+                        it.localizedMessage ?: "unexpected error just happened",
+                        dismiss = Dismiss.DismissState(dismiss = { resetUiState() })
                     )
                 )
             }.launchIn(viewModelScope)

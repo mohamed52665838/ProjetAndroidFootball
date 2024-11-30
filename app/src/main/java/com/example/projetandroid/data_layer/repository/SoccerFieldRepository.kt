@@ -13,208 +13,29 @@ import javax.inject.Inject
 class SoccerFieldRepository @Inject constructor(
     private val SoccerFieldAPI: SoccerFieldAPI
 ) : SoccerFieldRepositoryStandards {
-    override fun create(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>> =
-        flow {
-            emit(Events.LoadingEvent(data = null))
-            val response = SoccerFieldAPI.create(TOKEN_TYPE + token, soccerField)
-
-            if (!response.isSuccessful) {
-                /* return true status code in 200 & 300 */
-                /* handel errors between [0..199] and [300 ..[ */
-                if (response.code() in intArrayOf(400, 422)) {
-                    /* known status code */
-                    emit(
-                        Events.ErrorEvent(
-                            error = "make sure, you have filled all data, if so rapport issue"
-                        )
-                    )
-                } else if (response.code() == 409) {
-                    emit(
-                        Events.ErrorEvent(
-                            error = "email already exists"
-                        )
-                    )
-                } else {
-                    emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
-                }
-            } else {
-                // status code in [200, 300]
-                /* 90% the body is exists */
-                response.body()?.let { responseType ->
-                    // body it self may have errors in this range
-                    responseType.error?.let {
-                        emit(
-                            Events.ErrorEvent(
-                                error = fromStateCodeToDeveloperMessage(
-                                    response.code(),
-                                    replacement = it.joinToString("\n")
-                                )
-                            )
-                        )
-                    } ?: run {
-                        // in this cause we are sure no errors
-                        emit(Events.SuccessEvent(data = responseType.data!!))
-                    }
-                } ?: run {
-                    // empty body suddenly we don't have any indicator
-                    emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(0)))
-                }
-            }
+    override fun create(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> =
+        runRequest {
+            SoccerFieldAPI.create(token, soccerField)
         }
 
-    override fun update(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>> =
-        flow {
-            emit(Events.LoadingEvent(data = null))
-            val response = SoccerFieldAPI.update(TOKEN_TYPE + token, soccerField)
-
-            if (!response.isSuccessful) {
-                /* return true status code in 200 & 300 */
-                /* handel errors between [0..199] and [300 ..[ */
-                if (response.code() in intArrayOf(400, 422)) {
-                    /* known status code */
-                    emit(
-                        Events.ErrorEvent(
-                            error = "make sure, you have filled all data, if so rapport issue"
-                        )
-                    )
-                } else if (response.code() == 409) {
-                    emit(
-                        Events.ErrorEvent(
-                            error = "email already exists"
-                        )
-                    )
-                } else {
-                    emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
-                }
-            } else {
-                // status code in [200, 300]
-                /* 90% the body is exists */
-                response.body()?.let { responseType ->
-                    // body it self may have errors in this range
-                    responseType.error?.let {
-                        emit(
-                            Events.ErrorEvent(
-                                error = fromStateCodeToDeveloperMessage(
-                                    response.code(),
-                                    replacement = it.joinToString("\n")
-                                )
-                            )
-                        )
-                    } ?: run {
-                        // in this cause we are sure no errors
-                        emit(Events.SuccessEvent(data = responseType.data!!))
-                    }
-                } ?: run {
-                    // empty body suddenly we don't have any indicator
-                    emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(0)))
-                }
-            }
+    override fun update(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> =
+        runRequest {
+            SoccerFieldAPI.update(token, soccerField)
         }
 
 
     // not implemented for security raison :|
-    override fun delete(token: String, soccerField: SoccerField): Flow<Events<SoccerField?>> {
+    override fun delete(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> {
         TODO("Not yet implemented")
     }
 
-    //
 
-    override fun own(token: String): Flow<Events<SoccerField?>> = runRequest {
+    override fun own(token: String): Flow<Events<SoccerField>> = runRequest {
         SoccerFieldAPI.own(token)
     }
 
-
-//    fun own(token: String): Flow<Events<SoccerField?>> = flow {
-//        emit(Events.LoadingEvent(data = null))
-//        val response = SoccerFieldAPI.own(TOKEN_TYPE + token)
-//        if (!response.isSuccessful) {
-//            /* return true status code in 200 & 300 */
-//            /* handel errors between [0..199] and [300 ..[ */
-//            if (response.code() in intArrayOf(400, 422)) {
-//                /* known status code */
-//                emit(
-//                    Events.ErrorEvent(
-//                        error = "make sure, you have filled all data, if so rapport issue"
-//                    )
-//                )
-//            } else if (response.code() == 409) {
-//                emit(
-//                    Events.ErrorEvent(
-//                        error = "email already exists"
-//                    )
-//                )
-//            } else {
-//                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
-//            }
-//        } else {
-//            // status code in [200, 300]
-//            /* 90% the body is exists */
-//            response.body()?.let { responseType ->
-//                // body it self may have errors in this range
-//                responseType.error?.let {
-//                    emit(
-//                        Events.ErrorEvent(
-//                            error = fromStateCodeToDeveloperMessage(
-//                                response.code(),
-//                                replacement = it.joinToString("\n")
-//                            )
-//                        )
-//                    )
-//                } ?: run {
-//                    // in this cause we are sure no errors
-//                    emit(Events.SuccessEvent(data = responseType.data))
-//                }
-//            } ?: run {
-//                // empty body suddenly we don't have any indicator
-//                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(0)))
-//            }
-//        }
-//    }
-
-    override fun allSoccerFields(): Flow<Events<List<SoccerField>?>> = flow {
-        emit(Events.LoadingEvent(data = null))
-        val response = SoccerFieldAPI.allSoccerFields()
-        if (!response.isSuccessful) {
-            /* return true status code in 200 & 300 */
-            /* handel errors between [0..199] and [300 ..[ */
-            if (response.code() in intArrayOf(400, 422)) {
-                /* known status code */
-                emit(
-                    Events.ErrorEvent(
-                        error = "make sure, you have filled all data, if so rapport issue"
-                    )
-                )
-            } else if (response.code() == 409) {
-                emit(
-                    Events.ErrorEvent(
-                        error = "email already exists"
-                    )
-                )
-            } else {
-                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
-            }
-        } else {
-            // status code in [200, 300]
-            /* 90% the body is exists */
-            response.body()?.let { responseType ->
-                // body it self may have errors in this range
-                responseType.error?.let {
-                    emit(
-                        Events.ErrorEvent(
-                            error = fromStateCodeToDeveloperMessage(
-                                response.code(),
-                                replacement = it.joinToString("\n")
-                            )
-                        )
-                    )
-                } ?: run {
-                    // in this cause we are sure no errors
-                    emit(Events.SuccessEvent(data = responseType.data!!))
-                }
-            } ?: run {
-                // empty body suddenly we don't have any indicator
-                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(0)))
-            }
-        }
+    override fun allSoccerFields(): Flow<Events<List<SoccerField>>> = runRequest {
+        SoccerFieldAPI.allSoccerFields()
     }
+
 }

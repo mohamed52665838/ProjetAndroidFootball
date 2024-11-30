@@ -10,7 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -30,6 +35,7 @@ import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_us
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.SignupComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.dashboard_composables.DashboardScaffold
 import com.example.projetandroid.ui_layer.presentation.screens.user.AddNowMatchComposable
+import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.LoginViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.OTACodeViewModel
@@ -38,6 +44,7 @@ import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.MatchView
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.ProfileViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.SignupViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.SharedFlow
 
 
 @AndroidEntryPoint
@@ -51,7 +58,6 @@ class MainActivity : ComponentActivity() {
             val androidNavController = rememberNavController()
             val currentBackStack by androidNavController.currentBackStackEntryAsState()
             val destination = currentBackStack?.destination
-
             ProjetAndroidTheme {
                 Scaffold(
                     modifier = Modifier

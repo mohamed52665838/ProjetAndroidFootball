@@ -18,7 +18,7 @@ interface SoccerFieldAPI {
     suspend fun create(
         @Header("Authorization") token: String,
         @Body soccerField: SoccerField
-    ): Response<ResponseType<SoccerField?>>
+    ): Response<ResponseType<SoccerField?>?>
 
     @PUT("/terrain")
     suspend fun update(

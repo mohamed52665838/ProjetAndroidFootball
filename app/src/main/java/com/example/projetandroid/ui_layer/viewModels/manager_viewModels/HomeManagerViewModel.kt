@@ -39,13 +39,13 @@ class HomeManagerViewModel @Inject constructor(
     private val shardPref: ShardPref
 ) : ViewModel() {
 
-    protected val uiState = MutableStateFlow<UiState>(UiState.Idle)
+    private val uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiStateWatcher: SharedFlow<UiState> = uiState
 
-    protected val soccerField = mutableStateOf<SoccerField?>(null)
+    private val soccerField = mutableStateOf<SoccerField?>(null)
     val soccerFieldWatcher: State<SoccerField?> = soccerField
 
-    protected val _isLoadedData = mutableStateOf<Boolean>(false)
+    private val _isLoadedData = mutableStateOf(false)
     val isLoadedData: State<Boolean> = _isLoadedData
 
 
@@ -58,7 +58,6 @@ class HomeManagerViewModel @Inject constructor(
     }
 
     fun loadSoccerField() {
-
         val token = shardPref.getToken()
         soccerFieldRepository.own(token).onEach {
             when (it) {
@@ -80,7 +79,7 @@ class HomeManagerViewModel @Inject constructor(
         }.catch {
             uiState.emit(
                 UiState.Error(
-                    message = it.localizedMessage ?: "unexptected error just happened"
+                    message = it.localizedMessage ?: "unexpected error just happened"
                 )
             )
         }.launchIn(viewModelScope)

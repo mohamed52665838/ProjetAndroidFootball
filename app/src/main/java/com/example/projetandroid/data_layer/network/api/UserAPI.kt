@@ -20,7 +20,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface UserAPI {
-
     // no need to authentication
     @POST("/auth/login")
     suspend fun loginUser(@Body loginModel: AuthModel): Response<ResponseType<TokenModel?>?>

@@ -14,7 +14,7 @@ class AddressLookupRepository @Inject constructor(
     private val addressSearchApi: AddressSearchApi
 ) : AddressLookupRepositoryStandards {
     override fun getAddressByCity(city: String): Flow<Events<List<AddressSearchJson>>> = flow {
-        emit(Events.LoadingEvent(data = null))
+        emit(Events.LoadingEvent())
         val response = addressSearchApi.searchAddress(city)
 
         if (!response.isSuccessful) {

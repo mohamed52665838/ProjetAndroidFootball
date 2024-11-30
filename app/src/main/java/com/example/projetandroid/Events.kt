@@ -6,23 +6,17 @@ package com.example.projetandroid
 
 
 sealed class Events<T> {
-    class SuccessEvent<T>(
+    data class SuccessEvent<T>(
         val data: T,
-        val error: String? = null,
-        val isLoading: Boolean = false
-    ) :
-        Events<T>()
+        val successMessage: String? = null
+    ) : Events<T>()
 
-    class ErrorEvent<T>(
-        val data: T? = null,
+    data class ErrorEvent<T>(
         val error: String,
-        val isLoading: Boolean = false
-    ) :
-        Events<T>()
+    ) : Events<T>()
 
-    class LoadingEvent<T>(
-        val data: T? = null,
-        val error: String? = null,
+    data class LoadingEvent<T>(
         val isLoading: Boolean = true
     ) : Events<T>()
 }
+

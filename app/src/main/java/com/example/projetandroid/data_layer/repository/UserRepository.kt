@@ -40,7 +40,12 @@ class UserRepository @Inject constructor(
         email: String,
         role: String,
         phone: String
-    ): Flow<Events<TokenModel?>> = runRequest {
+    ): Flow<Events<TokenModel?>> = runRequest(
+        mapError = mapOf(
+            422 to "wrong data within the body, rapport issue",
+            400 to "wrong data within the body, rapport issue"
+        )
+    ) {
         userAPI.signup(
             SignUpModel(
                 name,
@@ -53,38 +58,36 @@ class UserRepository @Inject constructor(
         )
     }
 
-
-    override fun sendOtp(email: String): Flow<Events<Message?>> = runRequest {
+    override fun sendOtp(email: String): Flow<Events<Message>> = runRequest {
         userAPI.sendOTP(SendOTP(email))
     }
 
-
-    override fun verifyOtp(email: String, otp: String): Flow<Events<Message?>> = runRequest {
+    override fun verifyOtp(email: String, otp: String): Flow<Events<Message>> = runRequest {
         userAPI.sendVerify(VerifyOTPModel(email, otp))
     }
 
-
     // Authenticated requests
-
-    override fun logout(token: String): Flow<Events<Message?>> = runRequest {
+    override fun logout(token: String): Flow<Events<Message>> = runRequest {
         userAPI.logout(TOKEN_TYPE + token)
     }
 
-
-    override fun currentUser(token: String): Flow<Events<User?>> = runRequest {
+    override fun currentUser(token: String): Flow<Events<User>> = runRequest {
         userAPI.currentUser(TOKEN_TYPE + token)
     }
 
-
-    override fun updateCurrentUser(token: String, updateModel: UpdateModel): Flow<Events<User?>> =
-        runRequest {
+    override fun updateCurrentUser(token: String, updateModel: UpdateModel): Flow<Events<User>> =
+        runRequest(
+            mapError = mapOf(
+                401 to "token expired, login again",
+                422 to "wrong data within the body, rapport issue",
+                400 to "wrong data within the body, rapport issue"
+            )
+        ) {
             userAPI.update(TOKEN_TYPE + token, updateModel)
         }
 
-
-    override fun deleteAccount(token: String, id: String): Flow<Events<User?>> = runRequest {
+    override fun deleteAccount(token: String, id: String): Flow<Events<User>> = runRequest {
         userAPI.deleteCurrentUser(TOKEN_TYPE + token, id)
     }
-
 
 }

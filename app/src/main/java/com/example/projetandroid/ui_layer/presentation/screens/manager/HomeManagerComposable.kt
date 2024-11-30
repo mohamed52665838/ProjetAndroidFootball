@@ -47,8 +47,6 @@ fun HomeManagerComposable(
     navController: NavController
 ) {
 
-    val activityComposableChannel =
-        homeManagerViewModelBase.uiStateWatcher.collectAsState(initial = UiState.Idle)
 
     val motherFuckerMatch = homeManagerViewModelBase.soccerFieldWatcher.value
     val user = dashboardViewMode.user.value
@@ -56,11 +54,10 @@ fun HomeManagerComposable(
 
 
     HandleUIEvents(
-        uiState = activityComposableChannel.value,
+        uiState =
+        homeManagerViewModelBase.uiStateWatcher.collectAsState(initial = UiState.Idle).value,
         navController = navController,
-        onDone = { homeManagerViewModelBase.restUiState() }
     )
-
 
 
     LaunchedEffect(key1 = Unit) {
@@ -161,8 +158,6 @@ fun HomeManagerComposable(
             }
         }
     }
-
-
 }
 
 @Composable

@@ -230,10 +230,6 @@ fun AddSoccerFieldComposable(
                 uiState = sharedFlow.value,
                 onDone = {
                     viewModel.resetSharedFlow()
-                    if (sharedFlow.value is UiState.Success) {
-                        if ((sharedFlow.value as UiState.Success).operationCode == 200)
-                            navController.popBackStack()
-                    }
                 },
                 navController = navController
             )

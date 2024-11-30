@@ -60,9 +60,9 @@ fun DashboardScaffold(
     var currentFragment by rememberSaveable {
         mutableStateOf(DashboardState.HOME_FRAGMENT)
     }
-    val rootSharedFlowCollector = viewModel.uiState.collectAsState(initial = UiState.Idle)
+
     HandleUIEvents(
-        uiState = rootSharedFlowCollector.value,
+        uiState = viewModel.uiState.collectAsState(initial = UiState.Idle).value,
         navController = androidNavController,
         onDone = { viewModel.restUiState() })
     Scaffold(
@@ -114,7 +114,8 @@ fun DashboardScaffold(
                             painter = painterResource(id = R.drawable.baseline_account_circle_24),
                             contentDescription = "home"
                         )
-                    })
+                    }
+                )
             }
         }
 

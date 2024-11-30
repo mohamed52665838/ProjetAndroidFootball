@@ -18,9 +18,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +33,7 @@ import androidx.navigation.NavController
 import com.example.projetandroid.R
 import com.example.projetandroid.SignUp
 import com.example.projetandroid.UiState
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.AppPasswordTextFieldComposable
 import com.example.projetandroid.ui_layer.presentation.shared_components.AppTextFieldComposable
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
@@ -48,14 +51,14 @@ fun LoginComposable(
 ) {
 
     val focusManager = LocalFocusManager.current
-    val stateCollector = viewModel.uiStateFlowWatcher.collectAsState(initial = UiState.Idle)
-    HandleUIEvents(
-        uiState = stateCollector.value,
-        modifier = Modifier.zIndex(3f),
-        onDone = { viewModel.resetUiState() },
-        navController = navController
-    )
-    Box(modifier = Modifier.fillMaxSize()) {
+
+
+    SupportUiStatusBox(
+        modifier = Modifier.fillMaxSize(),
+        uiStatus = viewModel.uiStateFlowWatcher.collectAsState(),
+        controller = navController
+    ) {
+
         // event handler
         Image(
             modifier = Modifier.fillMaxSize(),

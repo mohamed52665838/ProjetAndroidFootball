@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.example.projetandroid.model.ResponseType
-import com.example.projetandroid.model.TokenModel
 import kotlinx.coroutines.flow.flow
 import retrofit2.Response
 
@@ -108,12 +107,25 @@ enum class SoccerFieldSubmissionFragments {
 sealed class UiState {
     data object Idle : UiState()
     data class Loading(val message: String? = null) : UiState()
-    data class Error(val message: String, val raisonCode: Int = 0) : UiState()
-    data class Success(val message: String, val operationCode: Int = 0) : UiState()
+    data class Error(
+        val message: String,
+        val dismiss: Dismiss? = null
+    ) : UiState()
+
+    data class Success(
+        val message: String,
+        val dismiss: Dismiss? = null
+    ) : UiState()
+
     data class NavigateEvent(
         val message: String? = null,
         val navigation: NavController.() -> Unit,
     ) : UiState()
+}
+
+sealed class Dismiss {
+    data class DismissState(val dismiss: () -> Unit) : Dismiss()
+    data class DismissStateWithNavigation(val dismiss: NavController.() -> Unit) : Dismiss()
 }
 
 
@@ -150,6 +162,8 @@ fun <T> runRequest(
     requestCallback: suspend () -> Response<ResponseType<T?>?>,
 ) = flow<Events<T>> {
 
+    emit(Events.LoadingEvent())
+
     val response = requestCallback()
 
     if (response.isSuccessful) {
@@ -162,7 +176,7 @@ fun <T> runRequest(
                     ?: "unexpected error just happened"))
             }
         } ?: kotlin.run {
-            // here in conditions where the request is successes but we don't have the response it's rarely but it can
+            // here in conditions where the request is successes but we don't have the response it's rarely but it can be
             emit(Events.ErrorEvent(error = "unexpected error just happened"))
         }
     } else {
