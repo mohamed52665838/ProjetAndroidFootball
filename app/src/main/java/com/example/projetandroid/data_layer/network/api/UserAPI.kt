@@ -23,20 +23,20 @@ interface UserAPI {
 
     // no need to authentication
     @POST("/auth/login")
-    suspend fun loginUser(@Body loginModel: AuthModel): Response<ResponseType<TokenModel?>>
+    suspend fun loginUser(@Body loginModel: AuthModel): Response<ResponseType<TokenModel?>?>
 
     @POST("/auth/signup")
-    suspend fun signup(@Body signupModel: SignUpModel): Response<ResponseType<TokenModel>?>
+    suspend fun signup(@Body signupModel: SignUpModel): Response<ResponseType<TokenModel?>?>
 
     @POST("/auth/otp-send")
-    suspend fun sendOTP(@Body sendTopModel: SendOTP): Response<ResponseType<Message?>>
+    suspend fun sendOTP(@Body sendTopModel: SendOTP): Response<ResponseType<Message?>?>
 
     @POST("/auth/otp-verify")
-    suspend fun sendVerify(@Body verifyModel: VerifyOTPModel): Response<ResponseType<Message?>>
+    suspend fun sendVerify(@Body verifyModel: VerifyOTPModel): Response<ResponseType<Message?>?>
     // end no need to authentication
 
     @POST("/auth/logout")
-    suspend fun logout(@Header("Authorization") token: String): Response<ResponseType<Message>?>
+    suspend fun logout(@Header("Authorization") token: String): Response<ResponseType<Message?>?>
 
     @POST("/auth/refresh")
     suspend fun refreshToken(@Body refreshTokenModel: AuthModel): Response<ResponseType<TokenModel?>>
@@ -45,14 +45,14 @@ interface UserAPI {
     suspend fun update(
         @Header("Authorization") token: String,
         @Body updateModel: UpdateModel
-    ): Response<ResponseType<User?>>
+    ): Response<ResponseType<User?>?>
 
     @GET("/user")
-    suspend fun currentUser(@Header("Authorization") token: String): Response<ResponseType<User?>>
+    suspend fun currentUser(@Header("Authorization") token: String): Response<ResponseType<User?>?>
 
     @DELETE("/user/{id}")
     suspend fun deleteCurrentUser(
         @Header("Authorization") token: String,
         @Path("id") id: String,
-    ): Response<ResponseType<User?>>
+    ): Response<ResponseType<User?>?>
 }

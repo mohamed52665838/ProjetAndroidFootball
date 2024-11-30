@@ -33,7 +33,7 @@ interface SoccerFieldAPI {
     ): Response<ResponseType<SoccerField?>?>
 
     @GET("/terrain/mine")
-    suspend fun own(@Header("Authorization") token: String): Response<ResponseType<SoccerField>?>
+    suspend fun own(@Header("Authorization") token: String): Response<ResponseType<SoccerField?>?>
 
     @GET("/terrain")
     suspend fun allSoccerFields(): Response<ResponseType<List<SoccerField>?>?>

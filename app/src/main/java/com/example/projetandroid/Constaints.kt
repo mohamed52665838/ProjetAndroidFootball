@@ -8,7 +8,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import java.lang.reflect.TypeVariable
+import com.example.projetandroid.model.ResponseType
+import com.example.projetandroid.model.TokenModel
+import kotlinx.coroutines.flow.flow
+import retrofit2.Response
 
 val BASE_URL = "http://10.0.2.2:4000"
 val ADDRESS_SEARCH_AP_URI = "https://nominatim.openstreetmap.org"
@@ -142,3 +145,32 @@ fun translateRole(role: Role): String {
     return role.name.lowercase()
 }
 
+fun <T> runRequest(
+    mapError: Map<Int, String>? = null,
+    requestCallback: suspend () -> Response<ResponseType<T?>?>,
+) = flow<Events<T>> {
+
+    val response = requestCallback()
+
+    if (response.isSuccessful) {
+        response.body()?.let {
+            if (it.status) {
+                // we are sure 100% there is a data
+                emit(Events.SuccessEvent(it.data!!))
+            } else {
+                emit(Events.ErrorEvent(error = it.error?.joinToString { "\n" }
+                    ?: "unexpected error just happened"))
+            }
+        } ?: kotlin.run {
+            // here in conditions where the request is successes but we don't have the response it's rarely but it can
+            emit(Events.ErrorEvent(error = "unexpected error just happened"))
+        }
+    } else {
+        val mayItsKnownError = mapError?.get(response.code())
+        mayItsKnownError?.let {
+            emit(Events.ErrorEvent(error = it))
+        } ?: kotlin.run {
+            emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
+        }
+    }
+}

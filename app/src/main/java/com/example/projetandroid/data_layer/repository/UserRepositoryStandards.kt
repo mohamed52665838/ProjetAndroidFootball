@@ -13,12 +13,12 @@ interface UserRepositoryStandards {
 
     fun signin(email: String, password: String): Flow<Events<TokenModel>>
     fun signup(
-        name: String?,
-        lastName: String?,
+        name: String,
+        lastName: String,
         password: String,
         email: String,
-        role: String?,
-        phone: String?,
+        role: String,
+        phone: String,
     ): Flow<Events<TokenModel?>>
 
     fun sendOtp(email: String): Flow<Events<Message?>>
