@@ -13,6 +13,7 @@ import com.example.projetandroid.data_layer.repository.MatchRepository
 import com.example.projetandroid.data_layer.repository.MatchRepositoryStandards
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.data_layer.repository.UserRepositoryStandards
+import com.example.projetandroid.ui_layer.event.EventsBus
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelBase
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelImp
 import com.example.projetandroid.ui_layer.viewModels.manager_viewModels.AddSoccerFieldViewModelProtocol
@@ -71,5 +72,9 @@ class AppModule {
     fun getSoccerFieldAPI(): SoccerFieldAPI {
         return RetrofitInstance.getInstance().create(SoccerFieldAPI::class.java)
     }
+
+
+    @Provides
+    fun getEventBus() = EventsBus
 
 }

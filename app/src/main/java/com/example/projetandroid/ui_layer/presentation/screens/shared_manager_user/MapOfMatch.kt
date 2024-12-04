@@ -38,11 +38,6 @@ fun MapOfMatch(
     navController: NavController
 ) {
 
-
-    SideEffect {
-        println(latitude)
-        println(long)
-    }
     val coroutineScope = rememberCoroutineScope()
     val mapState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(latitude, long), 15f)

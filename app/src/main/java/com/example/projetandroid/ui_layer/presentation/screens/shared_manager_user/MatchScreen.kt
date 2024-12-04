@@ -25,11 +25,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.projetandroid.AddMatch
 import com.example.projetandroid.Dashboard
@@ -38,7 +42,10 @@ import com.example.projetandroid.MapScreen
 import com.example.projetandroid.R
 import com.example.projetandroid.Role
 import com.example.projetandroid.UiState
+import com.example.projetandroid.model.match.matchModel.PlayersOfMatch
+import com.example.projetandroid.model.match.matchModel.UserId
 import com.example.projetandroid.translateRole
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.shared_components.PlayerOfMatchUiModel
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
@@ -57,11 +64,6 @@ fun MatchComposable(
     val currentMatch = matchViewModel.matchReponseModel.value
     val uiState_ = matchViewModel.uiState.collectAsState(initial = UiState.Idle)
 
-    HandleUIEvents(
-        uiState = uiState_.value,
-        navController = navController,
-        onDone = matchViewModel::removeState
-    )
 
     Scaffold(
         topBar = {
@@ -80,7 +82,6 @@ fun MatchComposable(
                     }
                 },
                 actions = {
-
                     matchViewModel.matchReponseModel.value?.let {
                         IconButton(onClick = {
                             navController.navigate(
@@ -100,10 +101,12 @@ fun MatchComposable(
             )
         }
     ) {
-        Box(
-            Modifier
+        SupportUiStatusBox(
+            modifier = Modifier
                 .padding(it)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            controller = navController,
+            uiStatus = uiState_
         ) {
             currentMatch?.let {
                 Column(
@@ -112,7 +115,10 @@ fun MatchComposable(
                         .verticalScroll(_root_ide_package_.androidx.compose.foundation.rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (dashboardViewModel.user.value!!.role == translateRole(Role.USER) && dashboardViewModel.user.value!!.id != it.userId._id && !it.playersOfMatch.any { it.userId._id == dashboardViewModel.user.value!!.id }) {
+                    if (dashboardViewModel.user.value!!.role == translateRole(Role.USER)
+                        && dashboardViewModel.user.value!!.id != it.userId._id &&
+                        !matchViewModel.playersOfMatch.any { it.userId._id == dashboardViewModel.user.value!!.id }
+                    ) {
                         // row for users only
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "Status", style = MaterialTheme.typography.titleLarge)
@@ -130,8 +136,12 @@ fun MatchComposable(
                                 }
                             }
                         }
-                    }
-
+                    } // 674f95792f8ac64f1cca1341
+                    Text(
+                        text = "ID: ${it._id}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Gray
+                    )
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -169,7 +179,10 @@ fun MatchComposable(
                                 )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "Players", style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    text = "Members",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                                 Text(
                                     text = it.playersOfMatch.size.toString(),
                                     style = MaterialTheme.typography.titleLarge
@@ -177,31 +190,106 @@ fun MatchComposable(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                     // the list of players right here
-                    Spacer(modifier = Modifier.height(8.dp))
-                    it.playersOfMatch.map { matchPlayer ->
-                        PlayerOfMatchUiModel(
-                            playersOfMatch = matchPlayer,
-                            isShowSuggestions = it.userId._id == dashboardViewModel.user.value!!.id,
-                            onAccept = {
-                                matchViewModel.accpetUser(matchPlayer._id)
-                            },
-                            onRefuse = {
-                                matchViewModel.refuseUser(matchPlayer._id)
-                            }
-
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(text = "Members", style = MaterialTheme.typography.titleLarge)
                     }
+
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Creator",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    PlayerOfMatchUiModel(
+                        playersOfMatch = PlayersOfMatch(
+                            _id = "", // no need to match id the created already joined
+                            matchId = it._id,
+                            userId = UserId(
+                                name = it.userId.name,
+                                _id = it.userId.email ?: it.userId._id
+                            ),
+                            isAccepted = true
+
+                        ), isShowSuggestions = false
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Members",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (matchViewModel.playersOfMatch.isEmpty())
+                        Box(
+                            modifier = Modifier
+                                .zIndex(10f),
+                            contentAlignment = Alignment.Center
+
+                        ) {
+                            Text(
+                                text = "No Members for Now",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color.Gray
+                            )
+                        }
+                    else
+                        matchViewModel.playersOfMatch.map { matchPlayer ->
+                            PlayerOfMatchUiModel(
+                                playersOfMatch = matchPlayer,
+                                isShowSuggestions = it.userId._id == dashboardViewModel.user.value!!.id,
+                                onAccept = {
+                                    matchViewModel.accpetUser(matchPlayer._id)
+                                },
+                                onRefuse = {
+                                    matchViewModel.refuseUser(matchPlayer._id)
+                                }
+
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+
                 }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+data class Person(var name: String)
+
+@Preview(showSystemUi = true)
 @Composable
 private fun MatchScreenViewModel() {
+
+    val list_ = remember {
+        mutableStateListOf(
+            Person(name = "a"),
+            Person(name = "b"),
+            Person(name = "c"),
+        )
+    }
+
     ProjetAndroidTheme {
+        Column {
+            Button(onClick = {
+                val person = list_[0]
+                val personCopy = person.copy(name = "hello")
+                list_.remove(person)
+                list_.add(personCopy)
+            }) {
+                Text(text = "change state")
+            }
+            list_.map {
+                Text(text = it.name)
+            }
+        }
     }
 }

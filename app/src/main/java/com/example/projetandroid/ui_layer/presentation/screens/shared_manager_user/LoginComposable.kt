@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +43,8 @@ import com.example.projetandroid.ui_layer.presentation.shared_components.Seconda
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.LoginViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.LoginViewModelBase
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 
 @Composable
@@ -52,7 +55,6 @@ fun LoginComposable(
 
     val focusManager = LocalFocusManager.current
 
-
     SupportUiStatusBox(
         modifier = Modifier.fillMaxSize(),
         uiStatus = viewModel.uiStateFlowWatcher.collectAsState(),
@@ -62,9 +64,10 @@ fun LoginComposable(
         // event handler
         Image(
             modifier = Modifier.fillMaxSize(),
-            painter = painterResource(id = R.drawable.trophy),
+            painter =
+            painterResource(id = R.drawable.trophy),
             alpha = 0.1f,
-            contentDescription = "background"
+            contentDescription = null
         )
         Column(
             modifier = Modifier
@@ -107,9 +110,11 @@ fun LoginComposable(
                 Text(text = "remember me", style = MaterialTheme.typography.titleMedium)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            PrimaryButton(onClick = {
-                focusManager.clearFocus()
-                viewModel.login()
+            PrimaryButton(onClick = remember {
+                {
+                    focusManager.clearFocus()
+                    viewModel.login()
+                }
             }, modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -123,8 +128,10 @@ fun LoginComposable(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            SecondaryButton(onClick = {
-                navController.navigate(SignUp)
+            SecondaryButton(onClick = remember {
+                {
+                    navController.navigate(SignUp)
+                }
             }, modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically

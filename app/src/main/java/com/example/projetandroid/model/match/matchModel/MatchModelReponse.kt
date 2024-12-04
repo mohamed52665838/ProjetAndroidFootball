@@ -5,7 +5,7 @@ data class MatchModelReponse(
     val _id: String,
     val createdAt: String,
     val date: String,
-    val playersOfMatch: MutableList<PlayersOfMatch>,
+    val playersOfMatch: List<PlayersOfMatch>,
     val terrainId: TerrainId,
     val updatedAt: String,
     val userId: UserIdX

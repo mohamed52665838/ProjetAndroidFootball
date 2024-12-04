@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -67,7 +68,7 @@ fun DashboardScaffold(
         onDone = { viewModel.restUiState() })
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(modifier = Modifier.padding(0.dp)) {
                 NavigationBarItem(
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = tertiaryColor,
@@ -118,9 +119,12 @@ fun DashboardScaffold(
                 )
             }
         }
-
     ) {
-        Box(modifier = Modifier.padding(it)) {
+        Box(
+            modifier = Modifier.padding(
+                bottom = it.calculateBottomPadding()
+            )
+        ) {
             viewModel.user.value?.let {
                 AnimatedContent(
                     targetState = currentFragment,

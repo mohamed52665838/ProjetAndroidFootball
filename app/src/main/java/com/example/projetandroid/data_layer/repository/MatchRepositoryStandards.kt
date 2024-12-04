@@ -21,9 +21,10 @@ interface MatchRepositoryStandards {
     fun createMatch(
         token: String,
         createMatchModelRequest: CreateMatchModelRequest
-    ): Flow<Events<CreateMatchModelResponse>>
+    ): Flow<Events<MatchModelReponse>>
 
     fun joinMatch(token: String, matchId: String): Flow<Events<PlayersOfMatch>>
+    fun jointedMatch(token: String, matchPlayerId: String): Flow<Events<JointedMatchX>>
     fun getAllJointedMatch(token: String): Flow<Events<AllJoinedMatchModel>>
     fun getMatch(token: String, matchId: String): Flow<Events<MatchModelReponse>>
 

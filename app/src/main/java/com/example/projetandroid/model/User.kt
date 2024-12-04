@@ -8,9 +8,8 @@ data class User(
     val active: Boolean,
     val email: String,
     @SerializedName("last_name")
-    val lastName: String,
+    val lastName: String? = null,
     val name: String,
-    val password: String,
-    val phone: String,
+    val phone: String?,
     val role: String
 )

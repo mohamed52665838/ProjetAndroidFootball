@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.projetandroid.MatchScreen
 import com.example.projetandroid.R
+import com.example.projetandroid.UiState
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.Match
 import com.example.projetandroid.ui_layer.presentation.shared_components.MatchCard
 import com.example.projetandroid.ui_layer.presentation.shared_components.MatchJointedCard
@@ -68,6 +72,7 @@ fun HomeUserComposable(
     val user = dashboardViewModel.user.value
     val listOfJointedMatches = homeUserViewModelBase.jointedMatchX
     val listOfOwnmatches = homeUserViewModelBase.myOwnMatches
+    val valScreenUiState = homeUserViewModelBase.uiState.collectAsState(UiState.Idle)
 
     user?.let {
         Scaffold(
@@ -105,57 +110,60 @@ fun HomeUserComposable(
         ) { paddingValues ->
             Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(paddingValues)
+                    .padding(horizontal = 8.dp)
+                    .padding(
+                        top = paddingValues.calculateTopPadding()
+                    )
             ) {
-                Column {
-                    Text(text = "My Own Matches", style = MaterialTheme.typography.titleMedium)
-                    TabRow(selectedTabIndex = currentTab) {
-                        Tab(selected = currentTab == 0, onClick = {
-                            currentTab = 0
-                        }) {
-                            Text(text = "Own matches")
-                        }
-                        Tab(selected = currentTab == 1, onClick = { currentTab = 1 }) {
-                            Text(text = "Jointed")
-                        }
-                    }
-
-                    when (currentTab) {
-                        0 -> {
-
-                            LazyColumn(contentPadding = PaddingValues(top = 8.dp)) {
-                                items(listOfOwnmatches) {
-                                    MatchCard(
-                                        match = OwnMatch(
-                                            it.terrainId.label,
-                                            it.date,
-                                            it.playersOfMatch.size,
-                                            it.terrainId.price.toDouble()
-                                        ),
-                                        onClick = { navController.navigate(MatchScreen(it._id)) }
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                }
+                SupportUiStatusBox(uiStatus = valScreenUiState, controller = navController) {
+                    Column {
+                        Text(text = "My Own Matches", style = MaterialTheme.typography.titleMedium)
+                        TabRow(selectedTabIndex = currentTab) {
+                            Tab(selected = currentTab == 0, onClick = {
+                                currentTab = 0
+                            }) {
+                                Text(text = "Own matches")
+                            }
+                            Tab(selected = currentTab == 1, onClick = { currentTab = 1 }) {
+                                Text(text = "Jointed")
                             }
                         }
 
-                        1 -> {
-                            LazyColumn(contentPadding = PaddingValues(top = 8.dp)) {
-                                items(listOfJointedMatches) {
-                                    MatchJointedCard(
-                                        match = Match(
-                                            it.isAccepted,
-                                            it.matchId.date,
-                                            it.matchId.playersOfMatch.size
+                        when (currentTab) {
+                            0 -> {
+                                LazyColumn(contentPadding = PaddingValues(top = 8.dp)) {
+                                    items(listOfOwnmatches) {
+                                        MatchCard(
+                                            match = OwnMatch(
+                                                it.terrainId.label,
+                                                it.date,
+                                                it.playersOfMatch.size,
+                                                it.terrainId.price
+                                            ),
+                                            onClick = { navController.navigate(MatchScreen(it._id)) }
                                         )
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+                            }
+
+                            1 -> {
+                                LazyColumn(contentPadding = PaddingValues(top = 8.dp)) {
+                                    items(listOfJointedMatches) {
+                                        MatchJointedCard(
+                                            match = Match(
+                                                it.isAccepted,
+                                                it.matchId.date,
+                                                it.matchId.playersOfMatch.size
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
                                 }
                             }
                         }
-                    }
 
+                    }
                 }
             }
         }

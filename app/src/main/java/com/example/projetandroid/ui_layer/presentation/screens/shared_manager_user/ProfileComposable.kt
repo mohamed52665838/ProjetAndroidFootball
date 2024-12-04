@@ -43,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.projetandroid.R
 import com.example.projetandroid.UiState
 import com.example.projetandroid.model.User
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.presentation.theme.containerColor
@@ -82,11 +83,6 @@ fun ProfileComposable(
 
 
     val activityComposableChannel = profileViewModel.uiState.collectAsState(initial = UiState.Idle)
-    HandleUIEvents(
-        uiState = activityComposableChannel.value,
-        navController = navController,
-        onDone = { profileViewModel.restUIState() }
-    )
 
     var canEdit by remember {
         mutableStateOf(false)
@@ -144,22 +140,24 @@ fun ProfileComposable(
         }
 
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 12.dp)
-        ) {
-            profileViewModel.fields.forEach { (key, value) ->
-                ProfileField(
-                    value = value.value.value,
-                    onChange = value.onChange,
-                    enable = canEdit,
-                    iconId = value.iconId,
-                    errorMessage = value.onErrorMessage?.value,
-                    label = value.label,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+        SupportUiStatusBox(uiStatus = activityComposableChannel, controller = navController) {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(horizontal = 12.dp)
+            ) {
+                profileViewModel.fields.forEach { (_, value) ->
+                    ProfileField(
+                        value = value.value.value,
+                        onChange = value.onChange,
+                        enable = canEdit,
+                        iconId = value.iconId,
+                        errorMessage = value.onErrorMessage?.value,
+                        label = value.label,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
         }
     }
@@ -215,7 +213,6 @@ private fun ProfileComposablePreview() {
         lastName = "lastname",
         phone = "342452345",
         id = "simple id",
-        password = "password",
         role = "manager"
     )
     ProjetAndroidTheme {

@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.projetandroid.Dismiss
 import com.example.projetandroid.Events.ErrorEvent
 import com.example.projetandroid.Events.LoadingEvent
 import com.example.projetandroid.Events.SuccessEvent
@@ -19,6 +20,8 @@ import com.example.projetandroid.data_layer.repository.MatchRepository
 import com.example.projetandroid.model.match.createModel.CreateMatchModelRequest
 import com.example.projetandroid.model.match.matchModel.MatchModelReponse
 import com.example.projetandroid.model.terrrain.TerrrainModel
+import com.example.projetandroid.ui_layer.event.EventBusType
+import com.example.projetandroid.ui_layer.event.EventsBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,7 +37,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddNowMatchViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    private val sharedPref: ShardPref
+    private val sharedPref: ShardPref,
+    private val eventsBus: EventsBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
@@ -61,7 +65,11 @@ class AddNowMatchViewModel @Inject constructor(
                 }
 
                 is ErrorEvent -> {
-                    _uiState.emit(UiState.Error(message = it.error))
+                    _uiState.emit(
+                        UiState.Error(message = it.error, dismiss = Dismiss.DismissState {
+                            _uiState.value = UiState.Idle
+                        }),
+                    )
                 }
 
                 is SuccessEvent -> {
@@ -81,19 +89,29 @@ class AddNowMatchViewModel @Inject constructor(
 
         if (date == null) {
             _uiState.value =
-                UiState.Error("Date or time not specified, click on the icons to select")
+                UiState.Error(
+                    "Date or time not specified, click on the icons to select",
+                    dismiss = Dismiss.DismissState {
+                        _uiState.value = UiState.Idle
+                    })
             return
 
         }
         // mother fucker!!
         if (time == null) {
             _uiState.value =
-                UiState.Error("Date or time not specified, click on the icons to select")
+                UiState.Error(
+                    "Date or time not specified, click on the icons to select",
+                    dismiss = Dismiss.DismissState {
+                        _uiState.value = UiState.Idle
+                    })
             return
         }
         if (selectedIndex == -1) {
             _uiState.value =
-                UiState.Error("You Haven't Select Soccer Field")
+                UiState.Error("You Haven't Select Soccer Field", dismiss = Dismiss.DismissState {
+                    _uiState.value = UiState.Idle
+                })
             return
         }
 
@@ -111,17 +129,37 @@ class AddNowMatchViewModel @Inject constructor(
                 }
 
                 is ErrorEvent -> {
-                    _uiState.emit(UiState.Error(message = it.error))
+                    _uiState.emit(UiState.Error(message = it.error,
+                        dismiss = Dismiss.DismissState {
+                            _uiState.value = UiState.Idle
+                        }
+                    )
+
+                    )
                 }
 
                 is SuccessEvent -> {
-                    _uiState.emit(UiState.Success("match created Successfully"))
+                    _uiState.emit(UiState.Success("match created Successfully",
+                        dismiss = Dismiss.DismissState {
+                            _uiState.value = UiState.Idle
+                        }
+                    )
+                    )
+                    eventsBus.matchAddedEvent(
+                        mapOf(
+                            EventBusType.ADD_MATCH_EVENT to it.data
+                        )
+                    )
+
                 }
             }
         }.catch {
             _uiState.emit(
                 UiState.Error(
-                    message = it.localizedMessage ?: "unexpected error just happened"
+                    message = it.localizedMessage ?: "unexpected error just happened",
+                    dismiss = Dismiss.DismissState {
+                        _uiState.value = UiState.Idle
+                    }
                 )
             )
         }

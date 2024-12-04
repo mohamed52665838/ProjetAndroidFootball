@@ -393,7 +393,6 @@ private fun DashboardActivitySectionManagerPreview() {
         name = "Mohamed",
         lastName = "Dhaouadi",
         phone = "5478965",
-        password = "password",
         active = true,
         email = "mohamed@go.com",
         role = "user"
@@ -411,7 +410,6 @@ fun DBHomeManagerPreview() {
         name = "Mohamed",
         lastName = "Dhaouadi",
         phone = "5478965",
-        password = "password",
         active = true,
         email = "mohamed@go.com",
         role = "user"

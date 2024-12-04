@@ -1,5 +1,6 @@
 package com.example.projetandroid
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,6 +37,7 @@ import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_us
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.SignupComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.dashboard_composables.DashboardScaffold
 import com.example.projetandroid.ui_layer.presentation.screens.user.AddNowMatchComposable
+import com.example.projetandroid.ui_layer.presentation.screens.user.MapAllSoccerFieldScreen
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.LoginViewModel
@@ -43,8 +46,13 @@ import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.Dashboard
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.MatchViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.ProfileViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.SignupViewModel
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.reflect.typeOf
 
 
 @AndroidEntryPoint
@@ -53,6 +61,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+
         enableEdgeToEdge()
         setContent {
             val androidNavController = rememberNavController()
@@ -67,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     NavHost(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
                         navController = androidNavController,
                         startDestination = SignIn
                     ) {
@@ -129,7 +139,6 @@ class MainActivity : ComponentActivity() {
                                     navController = androidNavController
                                 )
                             }
-
                             // root dashboard
                             composable<DashboardScaffold> {
                                 val parentEntry = remember(it) {
@@ -142,13 +151,13 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-
                             // profile composable function
                             composable<Profile> {
                                 val parentEntry = remember(it) {
                                     androidNavController.getBackStackEntry(Dashboard)
                                 }
                                 val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
+
                                 val profileViewModel =
                                     hiltViewModel<ProfileViewModel, ProfileViewModel.ProfileViewModelAssistant>(
                                         creationCallback = { factory ->
@@ -174,11 +183,11 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
-                                val matchId = currentBackStack!!.toRoute<MatchScreen>()
+                                val matchId = currentBackStack?.toRoute<MatchScreen>()
                                 val matchViewModel =
                                     hiltViewModel<MatchViewModel, MatchViewModel.MatchViewModelFactory>(
                                         creationCallback = { factory ->
-                                            factory.create(matchId.matchId ?: "noway")
+                                            factory.create(matchId?.matchId ?: "noway")
                                         })
                                 MatchComposable(
                                     dashboardViewModel = viewModel,
@@ -186,17 +195,31 @@ class MainActivity : ComponentActivity() {
                                     navController = androidNavController
                                 )
                             }
-
                             composable<MapScreen> {
-                                val matchId = currentBackStack!!.toRoute<MapScreen>()
+                                val matchId = currentBackStack?.toRoute<MapScreen>()
                                 val init_ = 0
                                 MapOfMatch(
-                                    latitude = matchId.lat ?: init_.toDouble(),
-                                    long = matchId.lon ?: init_.toDouble(),
+                                    latitude = matchId?.lat ?: init_.toDouble(),
+                                    long = matchId?.lon ?: init_.toDouble(),
                                     navController = androidNavController
                                 )
                             }
 
+                            composable<ListSoccerFieldScreenMap>(
+                                typeMap = mapOf(
+                                    typeOf<List<LatLongSerializable>?>() to CustomListLatLongList.LatlongIdType
+                                )
+                            ) {
+                                val listLongLat =
+                                    currentBackStack?.toRoute<ListSoccerFieldScreenMap>()
+                                val init_ = 0
+
+                                MapAllSoccerFieldScreen(
+                                    listOfSoccerField = listLongLat?.listLatLongSerializable
+                                        ?: emptyList(),
+                                    controller = androidNavController
+                                )
+                            }
                         }
 
                     }
@@ -279,3 +302,70 @@ data class MapScreen(
 @kotlinx.serialization.Serializable
 data object AddMatch
 
+
+@Serializable
+data class LatLongSerializable(
+    val latitude: Double,
+    val longitude: Double,
+    val _id: String
+)
+
+@kotlinx.serialization.Serializable
+data class ListSoccerFieldScreenMap(
+    val listLatLongSerializable: List<LatLongSerializable>? = null
+)
+
+
+object CustomTypeLatLong {
+    val LatlongIdType = object : NavType<ListSoccerFieldScreenMap>(
+        true
+    ) {
+        override fun get(bundle: Bundle, key: String): ListSoccerFieldScreenMap? {
+            bundle.getString(key)?.let {
+                return Json.decodeFromString(it)
+            } ?: return null
+        }
+
+        override fun parseValue(value: String): ListSoccerFieldScreenMap {
+            return Json.decodeFromString(Uri.decode(value))
+        }
+
+
+        override fun serializeAsValue(value: ListSoccerFieldScreenMap): String {
+            return Uri.encode(Json.encodeToString(value))
+        }
+
+        override fun put(bundle: Bundle, key: String, value: ListSoccerFieldScreenMap) {
+            bundle.putString(key, Json.encodeToString(value))
+        }
+
+    }
+
+}
+
+object CustomListLatLongList {
+    val LatlongIdType = object : NavType<List<LatLongSerializable>>(
+        true
+    ) {
+        override fun get(bundle: Bundle, key: String): List<LatLongSerializable>? {
+            bundle.getString(key)?.let {
+                return Json.decodeFromString(it)
+            } ?: return null
+        }
+
+        override fun parseValue(value: String): List<LatLongSerializable> {
+            return Json.decodeFromString(Uri.decode(value))
+        }
+
+
+        override fun serializeAsValue(value: List<LatLongSerializable>): String {
+            return Uri.encode(Json.encodeToString(value))
+        }
+
+        override fun put(bundle: Bundle, key: String, value: List<LatLongSerializable>) {
+            bundle.putString(key, Json.encodeToString(value))
+        }
+
+    }
+
+}

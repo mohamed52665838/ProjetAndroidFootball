@@ -52,6 +52,9 @@ interface DashboardViewModelProtocol {
     fun loadCurrentUser()
     fun restUiState()
     fun updateUser(user: User)
+    fun isUser(): Boolean
+    fun isManager(): Boolean
+    fun isMineById(resourceId: String): Boolean
 }
 
 abstract class DashboardViewModelBase : ViewModel(), DashboardViewModelProtocol {
@@ -66,6 +69,20 @@ abstract class DashboardViewModelBase : ViewModel(), DashboardViewModelProtocol 
     override fun updateUser(user: User) {
         _user.value = user
     }
+
+    override fun isManager(): Boolean {
+        return user.value?.role == translateRole(Role.MANAGER)
+    }
+
+    override fun isUser(): Boolean {
+        return user.value?.role == translateRole(Role.USER)
+    }
+
+    override fun isMineById(resourceId: String): Boolean {
+        return user.value?.id == resourceId
+    }
+
+
 }
 
 
@@ -122,7 +139,6 @@ class DashboardViewModelPreview : DashboardViewModelBase() {
             active = true,
             email = "email@go.com",
             name = "username",
-            password = "password",
             phone = "phone",
             lastName = "lastname",
             role = translateRole(Role.USER)
@@ -135,7 +151,6 @@ class DashboardViewModelPreview : DashboardViewModelBase() {
             active = true,
             email = "email@go.com",
             name = "username",
-            password = "password",
             phone = "phone",
             lastName = "lastname",
             role = translateRole(Role.USER)

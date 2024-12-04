@@ -41,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
 import com.example.projetandroid.UiState
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.shared_components.PrimaryButton
 import com.example.projetandroid.ui_layer.presentation.shared_components.SecondaryButton
@@ -57,12 +58,11 @@ fun OTAValidatorComposable(
 ) {
 
     val uiState = viewModel.uiState.collectAsState(initial = UiState.Idle)
-    Box(modifier = Modifier.fillMaxHeight(0.7f), contentAlignment = Alignment.Center) {
-        HandleUIEvents(
-            uiState = uiState.value,
-            navController = navController,
-            onDone = { viewModel.resetUiState() }, modifier = Modifier.zIndex(3f)
-        )
+    SupportUiStatusBox(
+        modifier = Modifier.fillMaxHeight(0.7f), contentAlignment = Alignment.Center,
+        controller = navController,
+        uiStatus = uiState
+    ) {
         Box(
             Modifier.padding(vertical = 32.dp), contentAlignment = Alignment.Center,
         ) {

@@ -30,7 +30,7 @@ interface MatchAPI {
     suspend fun createMatch(
         @Header("Authorization") token: String,
         @Body createMatchModelRequest: CreateMatchModelRequest
-    ): Response<ResponseType<CreateMatchModelResponse?>?>
+    ): Response<ResponseType<MatchModelReponse?>?>
 
 
     @GET("/match/{match}")
@@ -71,6 +71,12 @@ interface MatchAPI {
         @Header("Authorization") token: String,
         @Path("matchId") matchId: String
     ): Response<ResponseType<PlayersOfMatch?>?>
+
+    @GET("/match-player/{matchPlayerId}")
+    suspend fun jointed(
+        @Header("Authorization") token: String,
+        @Path("matchPlayerId") matchId: String
+    ): Response<ResponseType<JointedMatchX?>?>
 
     @GET("/terrain")
     suspend fun getAllTerrain(

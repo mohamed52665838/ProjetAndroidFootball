@@ -15,23 +15,23 @@ class SoccerFieldRepository @Inject constructor(
 ) : SoccerFieldRepositoryStandards {
     override fun create(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> =
         runRequest {
-            SoccerFieldAPI.create(token, soccerField)
+            SoccerFieldAPI.create(TOKEN_TYPE + token, soccerField)
         }
 
     override fun update(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> =
         runRequest {
-            SoccerFieldAPI.update(token, soccerField)
+            SoccerFieldAPI.update(TOKEN_TYPE + token, soccerField)
         }
 
 
     // not implemented for security raison :|
     override fun delete(token: String, soccerField: SoccerField): Flow<Events<SoccerField>> {
-        TODO("Not yet implemented")
+        TODO()
     }
 
 
     override fun own(token: String): Flow<Events<SoccerField>> = runRequest {
-        SoccerFieldAPI.own(token)
+        SoccerFieldAPI.own(TOKEN_TYPE + token)
     }
 
     override fun allSoccerFields(): Flow<Events<List<SoccerField>>> = runRequest {

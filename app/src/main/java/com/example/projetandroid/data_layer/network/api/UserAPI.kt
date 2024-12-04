@@ -54,4 +54,5 @@ interface UserAPI {
         @Header("Authorization") token: String,
         @Path("id") id: String,
     ): Response<ResponseType<User?>?>
+
 }

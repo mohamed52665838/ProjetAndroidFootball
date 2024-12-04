@@ -34,6 +34,7 @@ import com.example.projetandroid.R
 import com.example.projetandroid.SignIn
 import com.example.projetandroid.SignupFields
 import com.example.projetandroid.UiState
+import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.AppPasswordTextFieldComposable
 import com.example.projetandroid.ui_layer.presentation.shared_components.AppTextFieldComposable
 import com.example.projetandroid.ui_layer.presentation.shared_components.DropdownComposableApp
@@ -54,9 +55,11 @@ fun SignupComposable(
 
     val uiState = viewModel.uiState.collectAsState(UiState.Idle)
 
-    Box(
+    SupportUiStatusBox(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        controller = navController,
+        uiStatus = uiState
     ) {
         Box(
             Modifier.padding(vertical = 32.dp), contentAlignment = Alignment.Center,

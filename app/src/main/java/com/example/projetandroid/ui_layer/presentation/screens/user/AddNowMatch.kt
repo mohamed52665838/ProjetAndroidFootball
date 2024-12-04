@@ -36,6 +36,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.projetandroid.LatLongSerializable
+import com.example.projetandroid.ListSoccerFieldScreenMap
 import com.example.projetandroid.MapScreen
 import com.example.projetandroid.R
 import com.example.projetandroid.UiState
@@ -71,6 +73,19 @@ fun AddNowMatchComposable(
         10,
         11
     )
+
+
+    navController.currentBackStackEntry?.savedStateHandle?.get<String>("id")?.let { id_ ->
+        println("we've got an id $id_")
+        addNowMatchViewModel.selectedIndex =
+            addNowMatchViewModel.terrrainModel.value?.indexOfFirst {
+                it._id == id_
+            } ?: -1
+
+    } ?: run {
+        println("no id provided")
+    }
+
 
     val timePicker = TimePickerDialog(
         localcontextasactivity,
@@ -113,6 +128,24 @@ fun AddNowMatchComposable(
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_check_24),
+                            contentDescription = null
+                        )
+                    }
+
+                    IconButton(onClick = {
+                        addNowMatchViewModel.terrrainModel.value?.let { listOfTerrain ->
+                            val listValues = listOfTerrain.map {
+                                LatLongSerializable(
+                                    it.latitude.toDouble(),
+                                    it.longitude.toDouble(),
+                                    it._id
+                                )
+                            }
+                            navController.navigate(ListSoccerFieldScreenMap(listValues))
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_language_24),
                             contentDescription = null
                         )
                     }

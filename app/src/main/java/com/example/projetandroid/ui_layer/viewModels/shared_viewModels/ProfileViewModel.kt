@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projetandroid.BundledTextField
+import com.example.projetandroid.Dismiss
 import com.example.projetandroid.Events.*
 import com.example.projetandroid.R
 import com.example.projetandroid.ShardPref
@@ -80,8 +81,8 @@ abstract class ProfileViewModelBase(protected val user: User) : ViewModel(),
 
     final override fun fillUser() {
         fields[EditProfileFields.USERNAME]!!.value.value = user.name
-        fields[EditProfileFields.LASTNAME]!!.value.value = user.lastName
-        fields[EditProfileFields.PHONE_NUMBER]!!.value.value = user.phone
+        fields[EditProfileFields.LASTNAME]!!.value.value = user.lastName ?: "unset"
+        fields[EditProfileFields.PHONE_NUMBER]!!.value.value = user.phone ?: "unset"
         fields[EditProfileFields.EMAIL]!!.value.value = user.email
     }
 
@@ -147,19 +148,35 @@ class ProfileViewModel @AssistedInject constructor(
                 }
 
                 is ErrorEvent -> {
-                    _uiState.emit(UiState.Error(message = it.error))
+                    _uiState.emit(
+                        UiState.Error(message = it.error,
+                            dismiss = Dismiss.DismissState {
+                                _uiState.value = UiState.Idle
+                            }
+                        ),
+
+
+                        )
                 }
 
                 is SuccessEvent -> {
-                    _uiState.emit(UiState.Success(message = "your data updated successfully"))
-                    userUpdateCallback(it.data!!)
+                    _uiState.emit(UiState.Success(
+                        message = "your data updated successfully",
+                        dismiss = Dismiss.DismissState {
+                            _uiState.value = UiState.Idle
+                        }
+                    ))
+                    userUpdateCallback(it.data)
                 }
             }
         }.catch {
 
             _uiState.emit(
                 UiState.Error(
-                    message = it.localizedMessage ?: "unexpected error just happened"
+                    message = it.localizedMessage ?: "unexpected error just happened",
+                    dismiss = Dismiss.DismissState {
+                        _uiState.value = UiState.Idle
+                    }
                 )
             )
         }.launchIn(viewModelScope)

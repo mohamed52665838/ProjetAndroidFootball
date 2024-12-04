@@ -29,7 +29,7 @@ class MatchRepository @Inject constructor(
     override fun createMatch(
         token: String,
         createMatchModelRequest: CreateMatchModelRequest
-    ): Flow<Events<CreateMatchModelResponse>> = runRequest(
+    ): Flow<Events<MatchModelReponse>> = runRequest(
         mapError = mapOf(
             401 to "token expired, login again",
             422 to "wrong data within the body, rapport issue",
@@ -40,9 +40,21 @@ class MatchRepository @Inject constructor(
     }
 
     override fun joinMatch(token: String, matchId: String): Flow<Events<PlayersOfMatch>> =
-        runRequest {
+        runRequest(
+            mapError = mapOf(
+                422 to "Key not valid, please check your key",
+                404 to "Match not exists",
+                409 to "You're already joined this match",
+                400 to "Match full with players"
+            )
+        ) {
             matchAPI.join(TOKEN_TYPE + token, matchId)
         }
+
+    override fun jointedMatch(token: String, matchPlayerId: String): Flow<Events<JointedMatchX>> =
+        runRequest {
+            matchAPI.jointed(TOKEN_TYPE + token, matchPlayerId)
+        }// 675021274b0c5c803fc55316
 
 
     override fun getAllJointedMatch(token: String): Flow<Events<AllJoinedMatchModel>> = runRequest {

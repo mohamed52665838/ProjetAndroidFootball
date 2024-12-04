@@ -45,7 +45,10 @@ fun PlayerOfMatchUiModel(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = playersOfMatch.userId.name, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = playersOfMatch.userId.name.replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.titleLarge
+                )
                 Text(
                     text = playersOfMatch.matchId,
                     style = MaterialTheme.typography.titleMedium,
