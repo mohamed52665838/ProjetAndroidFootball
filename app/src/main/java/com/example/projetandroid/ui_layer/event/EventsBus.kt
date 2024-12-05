@@ -18,5 +18,5 @@ object EventsBus {
         _sharedFlowTrigger.emit(resourceId)
         println("Clean up")
         _sharedFlowTrigger.emit(null)
-    }//
+    }
 }

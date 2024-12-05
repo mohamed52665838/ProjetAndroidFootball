@@ -1,6 +1,13 @@
 package com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user
 
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.Intent
 import android.view.View
+import android.webkit.MimeTypeMap
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,9 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -30,6 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.NativeClipboard
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -63,6 +77,8 @@ fun MatchComposable(
 
     val currentMatch = matchViewModel.matchReponseModel.value
     val uiState_ = matchViewModel.uiState.collectAsState(initial = UiState.Idle)
+    val localClipboard = LocalClipboardManager.current
+    val context = LocalContext.current as Activity
 
 
     Scaffold(
@@ -137,11 +153,66 @@ fun MatchComposable(
                             }
                         }
                     } // 674f95792f8ac64f1cca1341
-                    Text(
-                        text = "ID: ${it._id}",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.Gray
-                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+
+
+                        IconButton(
+                            onClick = {
+                                Intent(Intent.ACTION_SEND).also { intent ->
+                                    intent.putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Hi there, ${dashboardViewModel.user.value!!.name.replaceFirstChar { it.uppercase() }}" +
+                                                "\nwith email: ${dashboardViewModel.user.value!!.email}" +
+                                                " requested you to join Match with match Id:\n${it._id}"
+                                    )
+                                    intent.type = "text/plain"
+                                    context.startActivity(intent)
+                                }
+                            },
+                            Modifier.size(20.dp)
+
+                        ) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+
+                                localClipboard.setClip(
+                                    ClipEntry(
+                                        ClipData(
+                                            ClipDescription("id of match", arrayOf("text/plain")),
+                                            ClipData.Item(it._id)
+                                        )
+                                    )
+                                )
+                            },
+                            Modifier.size(20.dp)
+
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_content_copy_24),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Text(
+                            text = "ID: ${it._id}",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Gray,
+                            modifier = Modifier.clickable {
+                            }
+                        )
+                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
