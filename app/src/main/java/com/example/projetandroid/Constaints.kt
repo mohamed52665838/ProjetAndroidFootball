@@ -159,11 +159,64 @@ fun translateRole(role: Role): String {
 
 fun <T> runRequest(
     mapError: Map<Int, String>? = null,
+    pref: ShardPref,
+    requestCallback: suspend (token: String) -> Response<ResponseType<T?>?>,
+) = flow<Events<T>> {
+
+    emit(Events.LoadingEvent())
+    val token = pref.getToken()
+    val response = requestCallback(token)
+
+    if (response.isSuccessful) {
+        response.body()?.let {
+            if (it.status) {
+                // we are sure 100% there is a data
+                emit(Events.SuccessEvent(it.data!!))
+            }
+        } ?: kotlin.run {
+            // here in conditions where the request is successes but we don't have the response it's rarely but it can be
+            emit(Events.ErrorEvent(error = "unexpected error just happened"))
+        }
+    } else if (response.code() == 401) {
+        // innerRequest
+        // can be processed as recursion I know but It's optimization
+        val resolvedToken = pref.resolveExpiredToken()
+        val response_ = requestCallback(resolvedToken)
+        if (response_.isSuccessful) {
+            response_.body()?.let {
+                if (it.status) {
+                    // we are sure 100% there is a data
+                    emit(Events.SuccessEvent(it.data!!))
+                }
+            } ?: kotlin.run {
+                // here in conditions where the request is successes but we don't have the response it's rarely but it can be
+                emit(Events.ErrorEvent(error = "unexpected error just happened"))
+            }
+        } else {
+            val mayItsKnownError = mapError?.get(response_.code())
+            mayItsKnownError?.let {
+                emit(Events.ErrorEvent(error = it))
+            } ?: kotlin.run {
+                emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response_.code())))
+            }
+        }
+    } else {
+        val mayItsKnownError = mapError?.get(response.code())
+        mayItsKnownError?.let {
+            emit(Events.ErrorEvent(error = it))
+        } ?: kotlin.run {
+            emit(Events.ErrorEvent(error = fromStateCodeToDeveloperMessage(response.code())))
+        }
+    }
+}
+
+
+fun <T> runNotAuthenticatedRequest(
+    mapError: Map<Int, String>? = null,
     requestCallback: suspend () -> Response<ResponseType<T?>?>,
 ) = flow<Events<T>> {
 
     emit(Events.LoadingEvent())
-
     val response = requestCallback()
 
     if (response.isSuccessful) {
@@ -188,3 +241,10 @@ fun <T> runRequest(
         }
     }
 }
+
+
+fun resolveToken() {
+
+}
+
+

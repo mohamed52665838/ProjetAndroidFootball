@@ -77,6 +77,7 @@ fun SettingsComposable(
             text = "Disconnect",
             iconId = R.drawable.exit,
             callback = {
+                dashboardViewModel.clearContext()
                 onSignOut()
                 navController.navigate(SignIn) {
                     popUpTo(0) {

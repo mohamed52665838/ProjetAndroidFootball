@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <style name="Theme.ProjetAndroid" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">
             #ffffff
         </item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">
+        <item name="android:windowSplashScreenAnimatedIcon">
             @mipmap/logo
         </item>
         <item name="android:statusBarColor">
             @color/transparent
         </item>
-
     </style>
-
 </resources>

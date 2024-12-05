@@ -2,6 +2,7 @@ package com.example.projetandroid
 
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,8 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.ui_layer.presentation.screens.manager.AddSoccerFieldComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.LoginComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.MapOfMatch
@@ -48,20 +52,67 @@ import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.ProfileVi
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.SignupViewModel
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 import kotlin.reflect.typeOf
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var userRepository: UserRepository
+
+    @Inject
+    lateinit var sharedpre: ShardPref
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var startDistination: Any = SignIn
+        val isStateOnTheScreen = mutableStateOf(true)
+
+        userRepository.currentUser().onEach {
+            when (it) {
+                is Events.SuccessEvent -> {
+                    startDistination = Dashboard
+                    delay(500)
+                    isStateOnTheScreen.value = false
+                }
+
+                is Events.ErrorEvent -> {
+
+                    startDistination = SignIn
+                    delay(500)
+                    isStateOnTheScreen.value = false
+                }
+
+                else -> {}
+            }
+        }
+            .catch {
+                startDistination = SignIn
+                delay(500)
+                isStateOnTheScreen.value = false
+            }.launchIn(lifecycleScope)
+
+
+        installSplashScreen().setKeepOnScreenCondition {
+            isStateOnTheScreen.value
+        }
         actionBar?.hide()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+
+        intent?.let {
+            println(it.categories.toString())
+        }
 
         enableEdgeToEdge()
         setContent {
@@ -79,7 +130,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
                         navController = androidNavController,
-                        startDestination = SignIn
+                        startDestination = startDistination
                     ) {
 
                         composable<SignIn>(

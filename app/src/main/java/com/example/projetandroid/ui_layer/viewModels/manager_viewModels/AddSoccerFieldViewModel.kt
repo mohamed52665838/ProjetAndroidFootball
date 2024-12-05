@@ -152,12 +152,10 @@ abstract class AddSoccerFieldViewModelBase : ViewModel(),
 class AddSoccerFieldViewModelImp @Inject constructor(
     private val terrainRepository: SoccerFieldRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val shardPref: ShardPref
 ) : AddSoccerFieldViewModelBase() {
 
     override fun submitSoccerField() {
         terrainRepository.create(
-            shardPref.getToken(),
             SoccerField(
                 date = LocalDate.now().toString(),
                 description = "",

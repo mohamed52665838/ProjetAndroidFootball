@@ -37,7 +37,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AddNowMatchViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    private val sharedPref: ShardPref,
     private val eventsBus: EventsBus
 ) : ViewModel() {
 
@@ -58,7 +57,7 @@ class AddNowMatchViewModel @Inject constructor(
 
     fun loadTerrains() {
 
-        matchRepository.getAllTerrain(sharedPref.getToken()).onEach {
+        matchRepository.getAllTerrain().onEach {
             when (it) {
                 is LoadingEvent -> {
                     _uiState.emit(UiState.Loading())
@@ -117,7 +116,6 @@ class AddNowMatchViewModel @Inject constructor(
 
 
         matchRepository.createMatch(
-            sharedPref.getToken(),
             CreateMatchModelRequest(
                 LocalDateTime.of(date, time).toString(),
                 _terrainModel.value!![selectedIndex]._id

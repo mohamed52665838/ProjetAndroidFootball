@@ -168,7 +168,8 @@ fun MatchComposable(
                                         Intent.EXTRA_TEXT,
                                         "Hi there, ${dashboardViewModel.user.value!!.name.replaceFirstChar { it.uppercase() }}" +
                                                 "\nwith email: ${dashboardViewModel.user.value!!.email}" +
-                                                " requested you to join Match with match Id:\n${it._id}"
+                                                " requested you to join Match with match Id:\n${it._id}\n" +
+                                                "soccer://matchapp.com.tn"
                                     )
                                     intent.type = "text/plain"
                                     context.startActivity(intent)

@@ -34,7 +34,7 @@ interface HomeUserViewModelProtocol {
     fun getJointedList()
     fun getMyOwnMatches()
     fun restUIState()
-    fun jointedMatch(token: String, matchPlayerId: String)
+    fun jointedMatch(matchPlayerId: String)
 }
 
 abstract class HomeUserViewModelBase : ViewModel(), HomeUserViewModelProtocol {
@@ -55,7 +55,6 @@ abstract class HomeUserViewModelBase : ViewModel(), HomeUserViewModelProtocol {
 
 @HiltViewModel
 class HomeUserViewModel @Inject constructor(
-    private val sharedPref: ShardPref,
     private val eventsBus: EventsBus,
     private val matchRepository: MatchRepository
 ) : HomeUserViewModelBase() {
@@ -71,7 +70,7 @@ class HomeUserViewModel @Inject constructor(
                     when (key) {
                         EventBusType.JOIN_MATCH_EVENT -> {
                             if (value is String)
-                                jointedMatch(sharedPref.getToken(), value)
+                                jointedMatch(value)
                             else
                                 println("Same thing went wrong")
                         }
@@ -88,7 +87,7 @@ class HomeUserViewModel @Inject constructor(
 
 
     override fun getJointedList() {
-        matchRepository.getAllJointedMatch(sharedPref.getToken()).onEach {
+        matchRepository.getAllJointedMatch().onEach {
 
             when (it) {
                 is Events.LoadingEvent -> {
@@ -110,7 +109,7 @@ class HomeUserViewModel @Inject constructor(
     }
 
     override fun getMyOwnMatches() {
-        matchRepository.getMyOwnMatches(sharedPref.getToken()).onEach {
+        matchRepository.getMyOwnMatches().onEach {
 
             when (it) {
                 is Events.LoadingEvent -> {
@@ -137,8 +136,8 @@ class HomeUserViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    override fun jointedMatch(token: String, matchPlayerId: String) {
-        matchRepository.jointedMatch(token, matchPlayerId).onEach {
+    override fun jointedMatch(matchPlayerId: String) {
+        matchRepository.jointedMatch(matchPlayerId).onEach {
             when (it) {
                 is Events.LoadingEvent -> {
                     _uiState.emit(UiState.Loading())
@@ -172,23 +171,23 @@ class HomeUserViewModel @Inject constructor(
 }
 
 
-class HomeUserViewModelPreview : HomeUserViewModelBase() {
-
-
-    override fun getJointedList() {
-        viewModelScope.launch {
-            _uiState.emit(UiState.Loading())
-            delay(1000)
-            _uiState.emit(UiState.Error(message = "Error unexpected"))
-        }
-    }
-
-    override fun getMyOwnMatches() {
-        TODO("Not yet implemented")
-    }
-
-    override fun jointedMatch(token: String, matchPlayerId: String) {
-        TODO("Not yet implemented")
-    }
-
-}
+//class HomeUserViewModelPreview : HomeUserViewModelBase() {
+//
+//
+//    override fun getJointedList() {
+//        viewModelScope.launch {
+//            _uiState.emit(UiState.Loading())
+//            delay(1000)
+//            _uiState.emit(UiState.Error(message = "Error unexpected"))
+//        }
+//    }
+//
+//    override fun getMyOwnMatches() {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun jointedMatch(token: String, matchPlayerId: String) {
+//        TODO("Not yet implemented")
+//    }
+//
+//}

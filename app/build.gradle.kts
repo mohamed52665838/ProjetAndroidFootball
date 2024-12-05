@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.gson)
 
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.viewmodel.compose.v287)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation(libs.kotlinx.serialization.json)

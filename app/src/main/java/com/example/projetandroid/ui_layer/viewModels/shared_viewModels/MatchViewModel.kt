@@ -35,7 +35,6 @@ import com.example.projetandroid.Events.LoadingEvent as LoadingEvent
 @HiltViewModel(assistedFactory = MatchViewModel.MatchViewModelFactory::class)
 class MatchViewModel @AssistedInject constructor(
     private val matchRepository: MatchRepository,
-    private val sharedPref: ShardPref,
     private val eventBus: EventsBus,
     @Assisted private val matchId: String
 ) : ViewModel() {
@@ -63,7 +62,7 @@ class MatchViewModel @AssistedInject constructor(
     }
 
     fun getMatch() {
-        matchRepository.getMatch(sharedPref.getToken(), matchId).onEach {
+        matchRepository.getMatch(matchId).onEach {
             when (it) {
 
                 is LoadingEvent -> {
@@ -93,7 +92,7 @@ class MatchViewModel @AssistedInject constructor(
 
 
     fun accpetUser(idUser: String) {
-        matchRepository.acceptMatch(sharedPref.getToken(), idUser).onEach {
+        matchRepository.acceptMatch(idUser).onEach {
             when (it) {
 
                 is LoadingEvent -> {
@@ -133,7 +132,7 @@ class MatchViewModel @AssistedInject constructor(
     }
 
     fun refuseUser(idUser: String) {
-        matchRepository.refuseMatch(sharedPref.getToken(), idUser).onEach {
+        matchRepository.refuseMatch(idUser).onEach {
             when (it) {
 
                 is LoadingEvent -> {
@@ -170,7 +169,7 @@ class MatchViewModel @AssistedInject constructor(
 
 
     fun joinMatch(matchId: String) {
-        matchRepository.joinMatch(sharedPref.getToken(), matchId).onEach {
+        matchRepository.joinMatch(matchId).onEach {
 
             when (it) {
                 is LoadingEvent -> {

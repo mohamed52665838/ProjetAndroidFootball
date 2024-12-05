@@ -36,7 +36,6 @@ abstract class HomeManagerViewModelBase : ViewModel(), HomeManagerViewModelProto
 @HiltViewModel
 class HomeManagerViewModel @Inject constructor(
     private val soccerFieldRepository: SoccerFieldRepository,
-    private val shardPref: ShardPref
 ) : ViewModel() {
 
     private val uiState = MutableStateFlow<UiState>(UiState.Idle)
@@ -58,8 +57,7 @@ class HomeManagerViewModel @Inject constructor(
     }
 
     fun loadSoccerField() {
-        val token = shardPref.getToken()
-        soccerFieldRepository.own(token).onEach {
+        soccerFieldRepository.own().onEach {
             when (it) {
                 is Events.LoadingEvent -> {
                     uiState.emit(UiState.Loading())

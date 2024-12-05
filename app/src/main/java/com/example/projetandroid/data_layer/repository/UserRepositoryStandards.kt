@@ -23,10 +23,10 @@ interface UserRepositoryStandards {
 
     fun sendOtp(email: String): Flow<Events<Message>>
     fun verifyOtp(email: String, otp: String): Flow<Events<Message>>
-    fun logout(token: String): Flow<Events<Message>>
-    fun currentUser(token: String): Flow<Events<User>>
-    fun updateCurrentUser(token: String, updateModel: UpdateModel): Flow<Events<User>>
-    fun deleteAccount(token: String, id: String): Flow<Events<User>>
+    fun logout(): Flow<Events<Message>>
+    fun currentUser(): Flow<Events<User>>
+    fun updateCurrentUser(updateModel: UpdateModel): Flow<Events<User>>
+    fun deleteAccount(id: String): Flow<Events<User>>
 
 
     // emitter -> receiver

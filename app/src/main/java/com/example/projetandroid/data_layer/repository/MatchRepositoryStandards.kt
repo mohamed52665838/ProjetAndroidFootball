@@ -16,21 +16,20 @@ import kotlinx.coroutines.flow.Flow
 
 interface MatchRepositoryStandards {
 
-    fun getMyOwnMatches(token: String): Flow<Events<OwnMatchsModel>>
+    fun getMyOwnMatches(): Flow<Events<OwnMatchsModel>>
 
     fun createMatch(
-        token: String,
         createMatchModelRequest: CreateMatchModelRequest
     ): Flow<Events<MatchModelReponse>>
 
-    fun joinMatch(token: String, matchId: String): Flow<Events<PlayersOfMatch>>
-    fun jointedMatch(token: String, matchPlayerId: String): Flow<Events<JointedMatchX>>
-    fun getAllJointedMatch(token: String): Flow<Events<AllJoinedMatchModel>>
-    fun getMatch(token: String, matchId: String): Flow<Events<MatchModelReponse>>
+    fun joinMatch(matchId: String): Flow<Events<PlayersOfMatch>>
+    fun jointedMatch(matchPlayerId: String): Flow<Events<JointedMatchX>>
+    fun getAllJointedMatch(): Flow<Events<AllJoinedMatchModel>>
+    fun getMatch(matchId: String): Flow<Events<MatchModelReponse>>
 
-    fun getMatches(token: String): Flow<Events<List<MatchModelReponse>>>
+    fun getMatches(): Flow<Events<List<MatchModelReponse>>>
 
-    fun acceptMatch(token: String, playerMatchId: String): Flow<Events<AcceptResponse>>
-    fun refuseMatch(token: String, playerMatchId: String): Flow<Events<RefuseModel>>
-    fun getAllTerrain(token: String): Flow<Events<List<TerrrainModel>>>
+    fun acceptMatch(playerMatchId: String): Flow<Events<AcceptResponse>>
+    fun refuseMatch(playerMatchId: String): Flow<Events<RefuseModel>>
+    fun getAllTerrain(): Flow<Events<List<TerrrainModel>>>
 }

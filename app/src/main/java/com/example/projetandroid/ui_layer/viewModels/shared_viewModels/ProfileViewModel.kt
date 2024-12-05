@@ -111,7 +111,6 @@ abstract class ProfileViewModelBase(protected val user: User) : ViewModel(),
 class ProfileViewModel @AssistedInject constructor(
     @Assisted private val assistedUser: User,
     private val userRepository: UserRepository,
-    private val sharedPref: ShardPref
 ) : ProfileViewModelBase(user = assistedUser) {
 
     @AssistedFactory
@@ -131,7 +130,6 @@ class ProfileViewModel @AssistedInject constructor(
                 return
         }
         userRepository.updateCurrentUser(
-            sharedPref.getToken(),
             UpdateModel(
                 name =
                 fields[EditProfileFields.USERNAME]!!.value.value,

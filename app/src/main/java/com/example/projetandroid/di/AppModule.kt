@@ -2,10 +2,12 @@ package com.example.projetandroid.di
 
 import android.app.Application
 import com.example.projetandroid.ShardPref
+import com.example.projetandroid.TOKEN_TYPE
 import com.example.projetandroid.data_layer.network.RetrofitInstance
 import com.example.projetandroid.data_layer.network.api.AddressSearchApi
 import com.example.projetandroid.data_layer.network.api.MatchAPI
 import com.example.projetandroid.data_layer.network.api.SoccerFieldAPI
+import com.example.projetandroid.data_layer.network.api.TokenAPI
 import com.example.projetandroid.data_layer.network.api.UserAPI
 import com.example.projetandroid.data_layer.repository.AddressLookupRepository
 import com.example.projetandroid.data_layer.repository.AddressLookupRepositoryStandards
@@ -41,13 +43,13 @@ class AppModule {
     }
 
     @Provides
-    fun getUserRepository(userAPI: UserAPI): UserRepositoryStandards {
-        return UserRepository(userAPI)
+    fun getUserRepository(userAPI: UserAPI, pref: ShardPref): UserRepositoryStandards {
+        return UserRepository(userAPI, pref)
     }
 
     @Provides
-    fun getMatchRepository(matchAPI: MatchAPI): MatchRepositoryStandards {
-        return MatchRepository(matchAPI)
+    fun getMatchRepository(matchAPI: MatchAPI, pref: ShardPref): MatchRepositoryStandards {
+        return MatchRepository(matchAPI, pref)
     }
 
     @Provides
@@ -63,8 +65,13 @@ class AppModule {
 
 
     @Provides
-    fun getShardPref(application: Application): ShardPref {
-        return ShardPref(application)
+    fun getTokenApi(): TokenAPI {
+        return RetrofitInstance.getInstance().create(TokenAPI::class.java)
+    }
+
+    @Provides
+    fun getShardPref(application: Application, tokenAPI: TokenAPI): ShardPref {
+        return ShardPref(application, tokenAPI)
     }
 
 

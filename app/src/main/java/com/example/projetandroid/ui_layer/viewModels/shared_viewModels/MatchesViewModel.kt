@@ -29,7 +29,6 @@ import javax.inject.Inject
 @HiltViewModel
 class MatchesViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    private val shardPref: ShardPref,
     private val eventBus: EventsBus
 ) : ViewModel() {
 
@@ -41,13 +40,12 @@ class MatchesViewModel @Inject constructor(
     val matches_: SnapshotStateList<MatchModelReponse> = _matches
 
     private fun loadAllMatches() {
-        matchRepository.getMatches(shardPref.getToken()).onEach {
+        matchRepository.getMatches().onEach {
             when (it) {
-
                 is LoadingEvent -> {
                     _uiState.emit(UiState.Loading())
                 }
-// 674762e2223251bfb7243490
+
                 is ErrorEvent -> {
                     _uiState.emit(
                         UiState.Error(message = it.error, dismiss = Dismiss.DismissState(
@@ -97,7 +95,7 @@ class MatchesViewModel @Inject constructor(
 
 
     fun joinMatch(matchId: String) {
-        matchRepository.joinMatch(shardPref.getToken(), matchId).onEach {
+        matchRepository.joinMatch(matchId).onEach {
 
             when (it) {
                 is LoadingEvent -> {

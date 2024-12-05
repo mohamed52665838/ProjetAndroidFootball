@@ -51,10 +51,12 @@ enum class StatusTriggered {
 interface DashboardViewModelProtocol {
     fun loadCurrentUser()
     fun restUiState()
+    fun clearContext()
     fun updateUser(user: User)
     fun isUser(): Boolean
     fun isManager(): Boolean
     fun isMineById(resourceId: String): Boolean
+
 }
 
 abstract class DashboardViewModelBase : ViewModel(), DashboardViewModelProtocol {
@@ -89,15 +91,14 @@ abstract class DashboardViewModelBase : ViewModel(), DashboardViewModelProtocol 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val shardPref: ShardPref
+    private val sharedPref: ShardPref
 ) : DashboardViewModelBase() {
     init {
         loadCurrentUser()
     }
 
     override fun loadCurrentUser() {
-        val token = shardPref.getToken()
-        userRepository.currentUser(token).onEach {
+        userRepository.currentUser().onEach {
             when (it) {
                 is Events.LoadingEvent -> {
                 }
@@ -128,6 +129,10 @@ class DashboardViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    override fun clearContext() {
+        sharedPref.clearToken()
+    }
+
 
 }
 
@@ -156,6 +161,10 @@ class DashboardViewModelPreview : DashboardViewModelBase() {
             role = translateRole(Role.USER)
         )
 
+    }
+
+    override fun clearContext() {
+        TODO("Not yet implemented")
     }
 
 }
