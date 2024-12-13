@@ -8,6 +8,7 @@ import com.example.projetandroid.TOKEN_TYPE
 import com.example.projetandroid.data_layer.network.api.MatchAPI
 import com.example.projetandroid.fromStateCodeToDeveloperMessage
 import com.example.projetandroid.model.ResponseType
+import com.example.projetandroid.model.match.MessageResponse
 import com.example.projetandroid.model.match.createModel.CreateMatchModelRequest
 import com.example.projetandroid.model.match.createModel.CreateMatchModelResponse
 import com.example.projetandroid.model.match.joinMatch.AcceptResponse
@@ -99,5 +100,10 @@ class MatchRepository @Inject constructor(
         matchAPI.getAllTerrain(it)
     }
 
+
+    override fun getAllMessages(matchId: String): Flow<Events<List<MessageResponse>>> =
+        runRequest(pref = pref) {
+            matchAPI.messagesOfMatch(it, matchId)
+        }
 
 }

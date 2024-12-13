@@ -2,6 +2,7 @@ package com.example.projetandroid.data_layer.repository
 
 import com.example.projetandroid.Events
 import com.example.projetandroid.model.ResponseType
+import com.example.projetandroid.model.match.MessageResponse
 import com.example.projetandroid.model.match.createModel.CreateMatchModelRequest
 import com.example.projetandroid.model.match.createModel.CreateMatchModelResponse
 import com.example.projetandroid.model.match.joinMatch.AcceptResponse
@@ -22,6 +23,7 @@ interface MatchRepositoryStandards {
         createMatchModelRequest: CreateMatchModelRequest
     ): Flow<Events<MatchModelReponse>>
 
+    fun getAllMessages(matchId: String): Flow<Events<List<MessageResponse>>>
     fun joinMatch(matchId: String): Flow<Events<PlayersOfMatch>>
     fun jointedMatch(matchPlayerId: String): Flow<Events<JointedMatchX>>
     fun getAllJointedMatch(): Flow<Events<AllJoinedMatchModel>>

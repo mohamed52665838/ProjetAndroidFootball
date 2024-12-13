@@ -41,6 +41,7 @@ import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_us
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.SignupComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.dashboard_composables.DashboardScaffold
 import com.example.projetandroid.ui_layer.presentation.screens.user.AddNowMatchComposable
+import com.example.projetandroid.ui_layer.presentation.screens.user.ChatRoomScreen
 import com.example.projetandroid.ui_layer.presentation.screens.user.MapAllSoccerFieldScreen
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
@@ -50,6 +51,7 @@ import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.Dashboard
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.MatchViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.ProfileViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.SignupViewModel
+import com.example.projetandroid.ui_layer.viewModels.user_viewModels.ChatRoomViewModel
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -61,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okio.IOException
 import javax.inject.Inject
 import kotlin.reflect.typeOf
 
@@ -71,8 +74,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var userRepository: UserRepository
 
-    @Inject
-    lateinit var sharedpre: ShardPref
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var startDistination: Any = SignIn
@@ -256,6 +257,29 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
+                            composable<RoomScreen> {
+                                val roomId = currentBackStack?.toRoute<RoomScreen>()
+                                roomId?.roomId?.let {
+
+                                    val parentEntry = remember(it) {
+                                        androidNavController.getBackStackEntry(Dashboard)
+                                    }
+
+                                    val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
+
+
+                                    val matchViewModel =
+                                        hiltViewModel<ChatRoomViewModel, ChatRoomViewModel.ChatRoomFactory>(
+                                            creationCallback = { factory ->
+                                                factory.create(it)
+                                            })
+                                    ChatRoomScreen(
+                                        dashboardViewModel = viewModel,
+                                        charRoomViewModel = matchViewModel,
+                                        navController = androidNavController
+                                    )
+                                }
+                            }
                             composable<ListSoccerFieldScreenMap>(
                                 typeMap = mapOf(
                                     typeOf<List<LatLongSerializable>?>() to CustomListLatLongList.LatlongIdType
@@ -352,6 +376,9 @@ data class MapScreen(
 
 @kotlinx.serialization.Serializable
 data object AddMatch
+
+@kotlinx.serialization.Serializable
+data class RoomScreen(val roomId: String? = null)
 
 
 @Serializable

@@ -55,6 +55,7 @@ import com.example.projetandroid.DashboardScaffold
 import com.example.projetandroid.MapScreen
 import com.example.projetandroid.R
 import com.example.projetandroid.Role
+import com.example.projetandroid.RoomScreen
 import com.example.projetandroid.UiState
 import com.example.projetandroid.model.match.matchModel.PlayersOfMatch
 import com.example.projetandroid.model.match.matchModel.UserId
@@ -62,6 +63,7 @@ import com.example.projetandroid.translateRole
 import com.example.projetandroid.ui_layer.presentation.SupportUiStatusBox
 import com.example.projetandroid.ui_layer.presentation.shared_components.HandleUIEvents
 import com.example.projetandroid.ui_layer.presentation.shared_components.PlayerOfMatchUiModel
+import com.example.projetandroid.ui_layer.presentation.shared_components.parseDate
 import com.example.projetandroid.ui_layer.presentation.theme.ProjetAndroidTheme
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.DashboardViewModel
 import com.example.projetandroid.ui_layer.viewModels.shared_viewModels.MatchViewModel
@@ -112,6 +114,18 @@ fun MatchComposable(
                                 contentDescription = "location match"
                             )
                         }
+                        if (dashboardViewModel.isMineById(
+                                currentMatch?.userId?._id ?: ""
+                            ) || currentMatch?.playersOfMatch?.any { dashboardViewModel.user.value!!.id == it.userId._id } == true
+                        )
+                            IconButton(onClick = {
+                                navController.navigate(RoomScreen(currentMatch?._id))
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_message_24),
+                                    contentDescription = "Message"
+                                )
+                            }
                     }
                 }
             )
@@ -221,17 +235,23 @@ fun MatchComposable(
                             horizontalArrangement = Arrangement.SpaceAround,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(text = "Date", style = MaterialTheme.typography.titleMedium)
                                 Text(
-                                    text = it.date.split("T")[0],
+                                    text = parseDate(it.date).first,
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(text = "Time", style = MaterialTheme.typography.titleMedium)
                                 Text(
-                                    text = it.date.split("T")[1],
+                                    text = parseDate(it.date).second,
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }
@@ -243,20 +263,27 @@ fun MatchComposable(
                             horizontalArrangement = Arrangement.SpaceAround,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(text = "Price", style = MaterialTheme.typography.titleMedium)
                                 Text(
                                     text = it.terrainId.price.toString(),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
                                     text = "Members",
                                     style = MaterialTheme.typography.titleMedium
                                 )
+
                                 Text(
-                                    text = it.playersOfMatch.size.toString(),
+                                    text = (it.playersOfMatch.size + 1).toString(),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }

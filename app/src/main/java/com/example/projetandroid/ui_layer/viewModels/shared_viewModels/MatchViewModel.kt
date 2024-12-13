@@ -204,4 +204,9 @@ class MatchViewModel @AssistedInject constructor(
                 )
             }.launchIn(viewModelScope)
     }
+
+    override fun onCleared() {
+
+        super.onCleared()
+    }
 }

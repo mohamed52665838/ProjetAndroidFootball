@@ -2,6 +2,7 @@ package com.example.projetandroid.data_layer.network.api
 
 import com.example.projetandroid.Events
 import com.example.projetandroid.model.ResponseType
+import com.example.projetandroid.model.match.MessageResponse
 import com.example.projetandroid.model.match.createModel.CreateMatchModelRequest
 import com.example.projetandroid.model.match.createModel.CreateMatchModelResponse
 import com.example.projetandroid.model.match.joinMatch.AcceptResponse
@@ -65,6 +66,11 @@ interface MatchAPI {
         @Header("Authorization") token: String,
     ): Response<ResponseType<List<MatchModelReponse>?>?>
 
+    @GET("/message/match/{matchId}")
+    suspend fun messagesOfMatch(
+        @Header("Authorization") token: String,
+        @Path("matchId") matchId: String
+    ): Response<ResponseType<List<MessageResponse>?>?>
 
     @POST("/match-player/join/{matchId}")
     suspend fun join(

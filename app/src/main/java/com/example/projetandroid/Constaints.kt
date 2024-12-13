@@ -242,9 +242,11 @@ fun <T> runNotAuthenticatedRequest(
     }
 }
 
-
-fun resolveToken() {
-
-}
+data class MessagePayload(
+    val userName: String,
+    val userId: String,
+    val content: String,
+    var datetime_: String
+)
 
 
