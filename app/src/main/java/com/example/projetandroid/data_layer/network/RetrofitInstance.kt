@@ -17,7 +17,8 @@ object RetrofitInstance {
             .Builder()
             .client(
                 OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS).callTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS).callTimeout(60, TimeUnit.SECONDS)
+                    .connectTimeout(60, TimeUnit.SECONDS)
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build()
             )

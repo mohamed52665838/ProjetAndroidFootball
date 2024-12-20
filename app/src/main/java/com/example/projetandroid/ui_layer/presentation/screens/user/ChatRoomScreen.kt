@@ -1,8 +1,11 @@
 package com.example.projetandroid.ui_layer.presentation.screens.user
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,12 +80,12 @@ fun ChatRoomScreen(
     navController: NavController
 ) {
 
-    val listOfMessages = charRoomViewModel.listOfMessagePayload
+    val listOfMessages = charRoomViewModel.listOfMessagePayload.reversed()
     val isMessagesLoading = charRoomViewModel.matchesLoading
     val alertDialogAsyncState = rememberAlertDialogAsyncState()
     val connectionStatus = charRoomViewModel.serverStatus
     val lazyListState = charRoomViewModel.lazyListState
-    var messageData = charRoomViewModel.messageData
+    val messageData = charRoomViewModel.messageData
 
     LaunchedEffect(key1 = Unit) {
         charRoomViewModel.errorChannel.onEach { errorMessage ->
@@ -115,19 +120,25 @@ fun ChatRoomScreen(
                 scrollBehavior = scrollBehavior
             )
         },
-        modifier = Modifier.padding(
-        )
+        modifier = Modifier
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(
+                    bottom = WindowInsets.ime
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                )
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .padding(it)
         ) {
             if (!isMessagesLoading.value)
                 LazyColumn(
                     state = lazyListState,
+                    reverseLayout = true,
                     modifier = Modifier
+                        .clickable { }
                         .weight(1f)
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
@@ -155,13 +166,7 @@ fun ChatRoomScreen(
 
             Row(
                 Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .padding(
-                        bottom =
-                        WindowInsets.ime
-                            .asPaddingValues()
-                            .calculateTopPadding()
-                    ),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextField(
@@ -198,7 +203,6 @@ fun ChatRoomScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
-
                     ) {
                         Text(
                             text = "failed to connect",
@@ -212,7 +216,36 @@ fun ChatRoomScreen(
 }
 
 
-@Preview(showBackground = true)
+
+@Preview(showSystemUi = true)
 @Composable
-private fun ChatRoomScreenPreview() {
+fun LazyColumnWithImePadding() {
+    val focusManager = LocalFocusManager.current
+    val list = (1..50).map { "Item $it" }
+    val scrollState = rememberLazyListState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding() // Ensures the column respects IME padding
+    ) {
+        LazyColumn(
+            state = scrollState,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        ) {
+            items(list) { item ->
+                TextField(
+                    value = item,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+            }
+        }
+
+        TextField(value = "", onValueChange ={}, modifier = Modifier.fillMaxWidth())
+    }
 }

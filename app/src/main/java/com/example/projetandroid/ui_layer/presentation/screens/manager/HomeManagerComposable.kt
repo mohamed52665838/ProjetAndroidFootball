@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,9 +27,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.projetandroid.AddSoccerField
+import com.example.projetandroid.ChatWithStewie
 import com.example.projetandroid.R
 import com.example.projetandroid.UiState
 import com.example.projetandroid.model.manager.Statistics
@@ -51,7 +55,12 @@ fun HomeManagerComposable(
     val motherFuckerMatch = homeManagerViewModelBase.soccerFieldWatcher.value
     val user = dashboardViewMode.user.value
     val isDataLoaded = homeManagerViewModelBase.isLoadedData.value
-
+    navController.currentBackStackEntry?.savedStateHandle?.getLiveData<Int?>("key", null)
+        ?.observeForever {
+            if (it != null) {
+                homeManagerViewModelBase.destroySession()
+            }
+        }
 
     HandleUIEvents(
         uiState =
@@ -72,6 +81,23 @@ fun HomeManagerComposable(
     }
     user?.let {
         Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate(ChatWithStewie)
+                    },
+                    containerColor = tertiaryColor
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.artificial_intelligence),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Stewie")
+                    }
+                }
+            },
             topBar = {
                 TopAppBar(title = {
                     Row(
@@ -130,7 +156,6 @@ fun HomeManagerComposable(
                             )
                         }
                     } ?: kotlin.run {
-
                         Column {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -239,4 +264,22 @@ fun TodaysPlayCount(numberOfPlayes: Int) {
             }
         }
     }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun StoweePreview() {
+
+    FloatingActionButton(onClick = { /*TODO*/ }) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(id = R.drawable.artificial_intelligence),
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Stewie")
+        }
+    }
+
 }

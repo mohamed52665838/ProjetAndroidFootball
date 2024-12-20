@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-12-13T03:01:51.541964944Z">
+        <DropdownSelection timestamp="2024-12-15T20:59:56.959936995Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/home/mr-essid/.android/avd/Medium_Phone_API_33.avd" />
@@ -26,9 +26,6 @@
           </targets>
         </DialogSelection>
       </SelectionState>
-      <SelectionState runConfigName="DashboardScaffoldPreview">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="ProfileComposablePreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -47,6 +44,9 @@
         <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="ChatRoomScreenPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="LazyColumnWithImePadding">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -1,12 +1,15 @@
 package com.example.projetandroid.di
 
 import android.app.Application
+import android.content.Context
+import androidx.work.WorkManager
 import com.example.projetandroid.ShardPref
 import com.example.projetandroid.TOKEN_TYPE
 import com.example.projetandroid.data_layer.network.RetrofitInstance
 import com.example.projetandroid.data_layer.network.api.AddressSearchApi
 import com.example.projetandroid.data_layer.network.api.MatchAPI
 import com.example.projetandroid.data_layer.network.api.SoccerFieldAPI
+import com.example.projetandroid.data_layer.network.api.StewieAPI
 import com.example.projetandroid.data_layer.network.api.TokenAPI
 import com.example.projetandroid.data_layer.network.api.UserAPI
 import com.example.projetandroid.data_layer.repository.AddressLookupRepository
@@ -23,6 +26,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -51,6 +55,12 @@ class AppModule {
     fun getMatchRepository(matchAPI: MatchAPI, pref: ShardPref): MatchRepositoryStandards {
         return MatchRepository(matchAPI, pref)
     }
+
+    @Provides
+    fun getStewieApi(): StewieAPI {
+        return RetrofitInstance.getInstance().create(StewieAPI::class.java)
+    }
+
 
     @Provides
     fun getAddressLookupRepository(addressSearchApi: AddressSearchApi): AddressLookupRepositoryStandards {

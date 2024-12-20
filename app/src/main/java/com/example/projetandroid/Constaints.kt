@@ -249,4 +249,8 @@ data class MessagePayload(
     var datetime_: String
 )
 
-
+data class ChatWithStewieMessage(
+    val content: String,
+    val time: String,
+    val isItMine: Boolean
+)

@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.projetandroid.data_layer.repository.UserRepository
 import com.example.projetandroid.ui_layer.presentation.screens.manager.AddSoccerFieldComposable
+import com.example.projetandroid.ui_layer.presentation.screens.manager.ChatWithStewieComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.LoginComposable
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.MapOfMatch
 import com.example.projetandroid.ui_layer.presentation.screens.shared_manager_user.MatchComposable
@@ -76,37 +77,37 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var startDistination: Any = SignIn
-        val isStateOnTheScreen = mutableStateOf(true)
+        val startDistination = mutableStateOf<Any?>(null)
+        if (startDistination.value == null) {
+            println("request has been sent")
+            userRepository.currentUser().onEach {
+                when (it) {
+                    is Events.SuccessEvent -> {
+                        println("here we go we have successfully got the user")
+                        startDistination.value = Dashboard
+                    }
 
-        userRepository.currentUser().onEach {
-            when (it) {
-                is Events.SuccessEvent -> {
-                    startDistination = Dashboard
-                    delay(500)
-                    isStateOnTheScreen.value = false
+                    is Events.ErrorEvent -> {
+                        println("failed to got the user")
+                        startDistination.value = SignIn
+                    }
+
+                    is Events.LoadingEvent -> {
+                        println("Loading State")
+                    }
+
                 }
-
-                is Events.ErrorEvent -> {
-
-                    startDistination = SignIn
-                    delay(500)
-                    isStateOnTheScreen.value = false
-                }
-
-                else -> {}
-            }
-        }
-            .catch {
-                startDistination = SignIn
-                delay(500)
-                isStateOnTheScreen.value = false
+            }.catch {
+                startDistination.value = SignIn
+                println("failed to got the user: with exception")
             }.launchIn(lifecycleScope)
+        }
 
 
         installSplashScreen().setKeepOnScreenCondition {
-            isStateOnTheScreen.value
+            startDistination.value == null
         }
+
         actionBar?.hide()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -123,180 +124,188 @@ class MainActivity : ComponentActivity() {
             ProjetAndroidTheme {
                 Scaffold(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding(),
+                        .fillMaxSize(),
                     topBar = {
                     }
                 ) { innerPadding ->
-                    NavHost(
-                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
-                        navController = androidNavController,
-                        startDestination = startDistination
-                    ) {
-
-                        composable<SignIn>(
-                            enterTransition = {
-                                scaleIn()
-                            },
-                            exitTransition = {
-                                scaleOut()
-                            }
+                    startDistination.value?.let {
+                        NavHost(
+                            modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
+                            navController = androidNavController,
+                            startDestination = it
                         ) {
-                            LoginComposable(
-                                viewModel = hiltViewModel<LoginViewModel>(),
-                                navController = androidNavController,
-                            )
-                        }
-                        composable<SignUp>(
-                            enterTransition = {
-                                scaleIn()
-                            },
-                            exitTransition = {
-                                scaleOut()
-                            }
-                        ) {
-                            SignupComposable(
-                                androidNavController,
-                                viewModel = hiltViewModel<SignupViewModel>()
-                            )
-                        }
 
-                        composable<CodeOTP>(
-                            enterTransition = {
-                                scaleIn()
-                            },
-
-                            exitTransition = {
-                                scaleOut()
+                            composable<SignIn>(
+                                enterTransition = {
+                                    scaleIn()
+                                },
+                                exitTransition = {
+                                    scaleOut()
+                                }
+                            ) {
+                                LoginComposable(
+                                    viewModel = hiltViewModel<LoginViewModel>(),
+                                    navController = androidNavController,
+                                )
                             }
-                        ) {
-                            val email = it.toRoute<CodeOTP>().email
-                            val viewModel: OTACodeViewModel =
-                                hiltViewModel<OTACodeViewModel, OTACodeViewModel.OTACodeViewModelFactory>(
-                                    creationCallback = { otaCodeViewModelFactory ->
-                                        otaCodeViewModelFactory.create(
-                                            email
-                                        )
+                            composable<SignUp>(
+                                enterTransition = {
+                                    scaleIn()
+                                },
+                                exitTransition = {
+                                    scaleOut()
+                                }
+                            ) {
+                                SignupComposable(
+                                    androidNavController,
+                                    viewModel = hiltViewModel<SignupViewModel>()
+                                )
+                            }
+
+                            composable<CodeOTP>(
+                                enterTransition = {
+                                    scaleIn()
+                                },
+
+                                exitTransition = {
+                                    scaleOut()
+                                }
+                            ) {
+                                val email = it.toRoute<CodeOTP>().email
+                                val viewModel: OTACodeViewModel =
+                                    hiltViewModel<OTACodeViewModel, OTACodeViewModel.OTACodeViewModelFactory>(
+                                        creationCallback = { otaCodeViewModelFactory ->
+                                            otaCodeViewModelFactory.create(
+                                                email
+                                            )
+                                        }
+                                    )
+                                OTAValidatorComposable(
+                                    viewModel = viewModel,
+                                    navController = androidNavController,
+                                )
+                            }
+                            navigation<Dashboard>(startDestination = DashboardScaffold) {
+                                composable<AddMatch> {
+                                    AddNowMatchComposable(
+                                        addNowMatchViewModel = hiltViewModel(),
+                                        navController = androidNavController
+                                    )
+                                }
+                                // root dashboard
+                                composable<DashboardScaffold> {
+                                    val parentEntry = remember(it) {
+                                        androidNavController.getBackStackEntry(Dashboard)
                                     }
-                                )
-                            OTAValidatorComposable(
-                                viewModel = viewModel,
-                                navController = androidNavController,
-                            )
-                        }
-                        navigation<Dashboard>(startDestination = DashboardScaffold) {
-                            composable<AddMatch> {
-                                AddNowMatchComposable(
-                                    addNowMatchViewModel = hiltViewModel(),
-                                    navController = androidNavController
-                                )
-                            }
-                            // root dashboard
-                            composable<DashboardScaffold> {
-                                val parentEntry = remember(it) {
-                                    androidNavController.getBackStackEntry(Dashboard)
-                                }
-                                val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
-                                DashboardScaffold(
-                                    viewModel = viewModel,
-                                    androidNavController = androidNavController,
-                                )
-                            }
-
-                            // profile composable function
-                            composable<Profile> {
-                                val parentEntry = remember(it) {
-                                    androidNavController.getBackStackEntry(Dashboard)
-                                }
-                                val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
-
-                                val profileViewModel =
-                                    hiltViewModel<ProfileViewModel, ProfileViewModel.ProfileViewModelAssistant>(
-                                        creationCallback = { factory ->
-                                            factory.create(viewModel.user.value!!)
-                                        })
-                                ProfileComposable(
-                                    viewModel = viewModel,
-                                    profileViewModel = profileViewModel,
-                                    navController = androidNavController
-                                )
-                            }
-
-                            // addSoccerField viewModel
-                            composable<AddSoccerField> {
-                                AddSoccerFieldComposable(
-                                    viewModel = hiltViewModel(),
-                                    navController = androidNavController
-                                )
-                            }
-                            composable<MatchScreen> {
-                                val parentEntry = remember(it) {
-                                    androidNavController.getBackStackEntry(Dashboard)
+                                    val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
+                                    DashboardScaffold(
+                                        viewModel = viewModel,
+                                        androidNavController = androidNavController,
+                                    )
                                 }
 
-                                val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
-                                val matchId = currentBackStack?.toRoute<MatchScreen>()
-                                val matchViewModel =
-                                    hiltViewModel<MatchViewModel, MatchViewModel.MatchViewModelFactory>(
-                                        creationCallback = { factory ->
-                                            factory.create(matchId?.matchId ?: "noway")
-                                        })
-                                MatchComposable(
-                                    dashboardViewModel = viewModel,
-                                    matchViewModel = matchViewModel,
-                                    navController = androidNavController
-                                )
-                            }
-                            composable<MapScreen> {
-                                val matchId = currentBackStack?.toRoute<MapScreen>()
-                                val init_ = 0
-                                MapOfMatch(
-                                    latitude = matchId?.lat ?: init_.toDouble(),
-                                    long = matchId?.lon ?: init_.toDouble(),
-                                    navController = androidNavController
-                                )
-                            }
+                                // profile composable function
+                                composable<Profile> {
+                                    val parentEntry = remember(it) {
+                                        androidNavController.getBackStackEntry(Dashboard)
+                                    }
+                                    val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
 
-                            composable<RoomScreen> {
-                                val roomId = currentBackStack?.toRoute<RoomScreen>()
-                                roomId?.roomId?.let {
+                                    val profileViewModel =
+                                        hiltViewModel<ProfileViewModel, ProfileViewModel.ProfileViewModelAssistant>(
+                                            creationCallback = { factory ->
+                                                factory.create(viewModel.user.value!!)
+                                            })
+                                    ProfileComposable(
+                                        viewModel = viewModel,
+                                        profileViewModel = profileViewModel,
+                                        navController = androidNavController
+                                    )
+                                }
 
+                                // addSoccerField viewModel
+                                composable<AddSoccerField> {
+                                    AddSoccerFieldComposable(
+                                        viewModel = hiltViewModel(),
+                                        navController = androidNavController
+                                    )
+                                }
+                                composable<MatchScreen> {
                                     val parentEntry = remember(it) {
                                         androidNavController.getBackStackEntry(Dashboard)
                                     }
 
                                     val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
-
-
+                                    val matchId = currentBackStack?.toRoute<MatchScreen>()
                                     val matchViewModel =
-                                        hiltViewModel<ChatRoomViewModel, ChatRoomViewModel.ChatRoomFactory>(
+                                        hiltViewModel<MatchViewModel, MatchViewModel.MatchViewModelFactory>(
                                             creationCallback = { factory ->
-                                                factory.create(it)
+                                                factory.create(matchId?.matchId ?: "noway")
                                             })
-                                    ChatRoomScreen(
+                                    MatchComposable(
                                         dashboardViewModel = viewModel,
-                                        charRoomViewModel = matchViewModel,
+                                        matchViewModel = matchViewModel,
+                                        navController = androidNavController
+                                    )
+                                }
+                                composable<MapScreen> {
+                                    val matchId = currentBackStack?.toRoute<MapScreen>()
+                                    val init_ = 0
+                                    MapOfMatch(
+                                        latitude = matchId?.lat ?: init_.toDouble(),
+                                        long = matchId?.lon ?: init_.toDouble(),
+                                        navController = androidNavController
+                                    )
+                                }
+
+                                composable<RoomScreen> {
+                                    val roomId = currentBackStack?.toRoute<RoomScreen>()
+                                    roomId?.roomId?.let {
+
+                                        val parentEntry = remember(it) {
+                                            androidNavController.getBackStackEntry(Dashboard)
+                                        }
+
+                                        val viewModel: DashboardViewModel =
+                                            hiltViewModel(parentEntry)
+
+
+                                        val matchViewModel =
+                                            hiltViewModel<ChatRoomViewModel, ChatRoomViewModel.ChatRoomFactory>(
+                                                creationCallback = { factory ->
+                                                    factory.create(it)
+                                                })
+                                        ChatRoomScreen(
+                                            dashboardViewModel = viewModel,
+                                            charRoomViewModel = matchViewModel,
+                                            navController = androidNavController
+                                        )
+                                    }
+                                }
+                                composable<ListSoccerFieldScreenMap>(
+                                    typeMap = mapOf(
+                                        typeOf<List<LatLongSerializable>?>() to CustomListLatLongList.LatlongIdType
+                                    )
+                                ) {
+                                    val listLongLat =
+                                        currentBackStack?.toRoute<ListSoccerFieldScreenMap>()
+                                    val init_ = 0
+                                    MapAllSoccerFieldScreen(
+                                        listOfSoccerField = listLongLat?.listLatLongSerializable
+                                            ?: emptyList(),
+                                        controller = androidNavController
+                                    )
+                                }
+
+
+                                composable<ChatWithStewie> {
+                                    ChatWithStewieComposable(
                                         navController = androidNavController
                                     )
                                 }
                             }
-                            composable<ListSoccerFieldScreenMap>(
-                                typeMap = mapOf(
-                                    typeOf<List<LatLongSerializable>?>() to CustomListLatLongList.LatlongIdType
-                                )
-                            ) {
-                                val listLongLat =
-                                    currentBackStack?.toRoute<ListSoccerFieldScreenMap>()
-                                val init_ = 0
 
-                                MapAllSoccerFieldScreen(
-                                    listOfSoccerField = listLongLat?.listLatLongSerializable
-                                        ?: emptyList(),
-                                    controller = androidNavController
-                                )
-                            }
                         }
-
                     }
                 }
             }
@@ -336,8 +345,11 @@ class CodeOTP(val email: String)
 
 // dashboard related routes
 
-@kotlinx.serialization.Serializable
+@Serializable
 object Profile
+
+@Serializable
+object ChatWithStewie
 
 
 @kotlinx.serialization.Serializable

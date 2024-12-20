@@ -83,7 +83,7 @@ class ChatRoomViewModel @AssistedInject constructor(
     val socketWrapperClass =
         SocketWrapperClass(shardPref, roomId, _serverStatus) {
             _listOfMessagePayload.add(it)
-            lazyListState.requestScrollToItem(_listOfMessagePayload.lastIndex)
+            lazyListState.requestScrollToItem(0)
         }
 
     init {
